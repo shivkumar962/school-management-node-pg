@@ -1,5 +1,5 @@
 const constants = require('../constants');
-console.log('constants-->>', constants);
+// console.log('constants-->>', constants);
 // multer file upload
 const multer = require("multer");
 const fs = require("fs");
@@ -48,7 +48,7 @@ const storageUserMedia = multer.diskStorage({
 
   
 // Create upload middleware for a single file
-const designUploader = multer({ storage: storageDesign }).single("designFile");
+const designUploader = multer({ storage: storageDesign }).array("designFile",12);
 
 // Create upload middleware for a single file
 const userMediaUploader = multer({ storage: storageUserMedia }).single("profile");

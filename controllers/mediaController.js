@@ -45,7 +45,7 @@ module.exports.getOne = async (req, res, next) => {
 
 // Create
 module.exports.create = async (req, res, next) => {
-  console.log("📂create data==", req.body);
+  // console.log("📂create data==", req.body);
 
   try {
     const record = await Media.create({
@@ -56,7 +56,7 @@ module.exports.create = async (req, res, next) => {
       createdBy: req.body.createdBy,
       updatedBy: req.body.updatedBy,
     });
-    console.log("record ", record);
+    // console.log("record ", record);
 
     res.json({
       status: "success",
@@ -108,7 +108,7 @@ module.exports.update = async (req, res, next) => {
 
 // Delete
 module.exports.delete = async (req, res, next) => {
-  console.log("❌ delete record ", req.body, "❌");
+  // console.log("❌ delete record ", req.body, "❌");
 
   try {
     const id = req.body.id;

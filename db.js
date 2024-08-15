@@ -36,7 +36,7 @@ const Media = MediaModel(sequelize);
 
 
 if (process.env.MIGRATE_DB == 'TRUE') {
-	sequelize.sync().then(() => {
+	sequelize.sync({ force: true}).then(() => {
 		console.log(`All tables synced!`);
 		process.exit(0);
 	});

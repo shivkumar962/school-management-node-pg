@@ -45,7 +45,7 @@ module.exports.isDesignExistsCreate = async (req, res, next) => {
         designName: req.body.designName,
       },
     });
-    console.log("Designs.findOne", design);
+    // console.log("Designs.findOne", design);
 
     if (design) {
       let err = new Error("design already exists");

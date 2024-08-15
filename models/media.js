@@ -18,6 +18,10 @@ module.exports.MediaModel = (sequelize) => {
 				type: DataTypes.INTEGER,
 				allowNull: false,
 			},
+			image: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
 			userId: {
 				type: DataTypes.INTEGER,
 				allowNull: true,

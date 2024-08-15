@@ -19,7 +19,7 @@ let schemaCreate = yup.object().shape({
 
 // Validation - Create
 module.exports.validationCreate = (req, res, next) => {
-  console.log("🥳 validationCreate======>>>>>", req.body, "🥳");
+  // console.log("🥳 validationCreate======>>>>>", req.body, "🥳");
   // console.log("📂 filename======>>>>>", req.file.filename, "📂");
 
   schemaCreate
@@ -53,7 +53,7 @@ module.exports.isMediaExistsCreate = async (req, res, next) => {
         designName: req.body.designName,
       },
     });
-    console.log("Media.findOne", media);
+    // console.log("Media.findOne", media);
 
     if (media) {
       let err = new Error("design already exists");

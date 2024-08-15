@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize');
+const {Sequelize, DataTypes } = require('sequelize');
 
 module.exports.DesignsModel = (sequelize) => {
 	return sequelize.define(
@@ -18,23 +18,20 @@ module.exports.DesignsModel = (sequelize) => {
 				type: DataTypes.FLOAT,
 				allowNull: true,
 			},
-			image: {
-				type: DataTypes.STRING,
-				allowNull: true,
-			},
+		
 			recordStatus: {
 				type: DataTypes.BOOLEAN,
 				allowNull: false,
 				defaultValue: true,
 			},
 			image: {
-				type: DataTypes.STRING,
+				type: DataTypes.JSONB, // Use JSONB to store array of strings
 				allowNull: true,
 			},
 		},
 		{
 			// Other model options go here
-			freezeTableName: true,
+			// freezeTableName: true,
 			//tableName: 'tablename',
 			timestamps: true,
 		}
