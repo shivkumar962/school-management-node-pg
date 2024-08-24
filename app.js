@@ -3,16 +3,17 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
+// const multer = require('multer')
 
 const app = express();
 
+
+
+
 app.use(helmet());
 app.use(morgan('tiny'));
-app.use(
-	cors({
-		//origin: process.env.CLIENT_URL
-	})
-);
+app.use(cors({//origin: process.env.CLIENT_URL
+	                                          }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public')); // folder to upload files

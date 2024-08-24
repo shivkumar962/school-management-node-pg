@@ -43,9 +43,36 @@ module.exports.getOne = async (req, res, next) => {
   }
 };
 
+//design table getById with media left join  
+module.exports.getById = async (req, res, next) => {
+  // console.log("design controller get one",req.params.id);
+
+  try {
+    const id = req.params.id;
+    const design = await Designs.findOne({
+      where: { id: id },
+      include: [
+        {
+          model: Media,
+          attributes: ['id', 'type', 'designId', 'image'], // Select specific fields
+          required: false, // LEFT JOIN ke liye false rakhein
+        },
+      ],
+      attributes: ['id', 'designName', 'price', 'recordStatus'], // Designs table se select karne ke liye
+    });
+    res.json({
+      status: "success",
+      result: design,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+
 // Create
 module.exports.create = async (req, res, next) => {
-  // console.log('📂create data==',req.file.filename);
+  console.log('📂create data==',req.files.filename);
   const imageFilenames = req.files.map((file) => file.filename); // []
   console.log("📂create data==", req.body);
   console.log("imageFilenames data==", imageFilenames);
@@ -88,31 +115,30 @@ module.exports.create = async (req, res, next) => {
   }
 };
 
-// Update
-module.exports.update = async (req, res, next) => {
-  // console.log("design update",req.body)
+// addNewDesignImage
+module.exports.addNewDesignImage = async (req, res, next) => {
+  console.log("addNewDesignImage ===",req.body)
+  console.log("addNewDesignImage filename ===",req.files[0].filename)
   try {
     const id = req.body.id;
-    const design = req.body.designName;
-    const price = req.body.price;
+    const image = req.files[0].filename;
+
+
 
     const record = await Designs.update(
       {
-        designName: design,
-        price: price,
+        image: image,
+      
       },
       {
-        // where: {
-        // 	id: {
-        // 		[Op.eq]: id,
-        // 	},
-        // },
         where: {
           id: id,
         },
       }
     );
 
+
+    console.log("addNewDesignImage record ===",record)
     res.json({
       status: "success",
       result: {
@@ -123,6 +149,7 @@ module.exports.update = async (req, res, next) => {
     return next(err);
   }
 };
+
 
 // Delete
 module.exports.delete = async (req, res, next) => {

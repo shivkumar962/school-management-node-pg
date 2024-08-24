@@ -7,8 +7,8 @@ const { Op } = require("sequelize");
 
 // Schema - Create
 let schemaCreate = yup.object().shape({
-  design: yup.string().required('design name is required'),
-  price: yup.string().required('design price is required'),
+  design: yup.string().required("design name is required"),
+  price: yup.string().required("design price is required"),
   image: yup.string(),
 });
 // console.log("🐞 design middleware======>>>>>");
@@ -22,8 +22,7 @@ module.exports.validationCreate = (req, res, next) => {
     .validate(
       {
         design: req.body.designName,
-	    	price: req.body.price,
-
+        price: req.body.price,
       },
       { abortEarly: false }
     )
@@ -61,41 +60,10 @@ module.exports.isDesignExistsCreate = async (req, res, next) => {
 
 // ========================================================================
 
-// Schema - Update
-let schemaUpdate = yup.object().shape({
-  id: yup.number().required(),
-  design: yup.string().required("name is required"),
-  price: yup.string().required('price is required'),
-
-  
-});
-
-// Validation - Update
-module.exports.validationUpdate = (req, res, next) => {
-  // validations here
-  // console.log("🐞 validationUpdate==>",req.body);
-
-  schemaUpdate
-    .validate(
-      {
-        id: req.body.id,
-        design: req.body.designName,
-		price: req.body.price,
-      },
-      { abortEarly: false }
-    )
-    .then(function () {
-      next();
-    })
-    .catch(function (err) {
-      return next(err);
-    });
-};
 
 // Check if record exists - Update
 module.exports.isDesignExistsUpdate = async (req, res, next) => {
-	// console.log("🐞 validationUpdate",req.body);
-
+  // console.log("🐞 validationUpdate",req.body);
 
   try {
     const design = await Designs.findOne({

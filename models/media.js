@@ -17,7 +17,11 @@ module.exports.MediaModel = (sequelize) => {
 			designId: {
 				type: DataTypes.INTEGER,
 				allowNull: false,
-			},
+				references: {
+				  model: 'Designs',
+				  key: 'id',
+				},
+			  },
 			image: {
 				type: DataTypes.STRING,
 				allowNull: false,

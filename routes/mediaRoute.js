@@ -19,16 +19,10 @@ const mediaController = require("../controllers/mediaController");
 
 router.get("/media", mediaController.getAll);
 
-router.get("/media/:id", mediaController.getOne);
+router.get("/media/:id", mediaController.getByDesignId);
 
-router.post("/media", validationCreate, mediaController.create);
+router.post("/addMediaImage",mediaUploadMiddleware.uploadMedia(constants.mediaTypes.design) , mediaController.addMediaImage);
 
-router.put("/media", [validationUpdate], mediaController.update);
 
-router.delete("/media", [validationDelete], mediaController.delete);
-
-router.post("/media/update_picture", mediaController.updatePicture);//extra route
-
-router.post("/media/send_email", mediaController.sendEmail);//extra route
 
 module.exports = router;

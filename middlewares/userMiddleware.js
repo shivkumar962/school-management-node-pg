@@ -20,7 +20,7 @@ let schemaSignup = yup.object().shape({
 // Validation - Signup
 module.exports.validationSignup = (req, res, next) => {
 	// validations here
-	// console.log('🐞 validationSignup');
+	// console.log('🐞 validationSignup',req.body);
 
 	schemaSignup
 		.validate(

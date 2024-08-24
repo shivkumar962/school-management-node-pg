@@ -34,9 +34,20 @@ const { MediaModel } = require('./models/media')
 const Media = MediaModel(sequelize);
 
 
+// Relationships
+Designs.hasMany(Media, {
+	foreignKey: 'designId',
+	sourceKey: 'id', // Optional, yeh by default `id` hota hai
+  });
+  
+  Media.belongsTo(Designs, {
+	foreignKey: 'designId',
+	targetKey: 'id', // Optional, yeh by default `id` hota hai
+  });
+  
 
 if (process.env.MIGRATE_DB == 'TRUE') {
-	sequelize.sync({ force: true}).then(() => {
+	sequelize.sync({ alter: true}).then(() => {
 		console.log(`All tables synced!`);
 		process.exit(0);
 	});

@@ -43,6 +43,16 @@ module.exports.UserModel = (sequelize) => {
 				type: DataTypes.STRING,
 				allowNull: true,
 			},
+
+			loginToken: {
+				type: DataTypes.STRING,
+				allowNull: true,
+			},
+			// login token expiry date
+			loginExpiry: {
+				type: DataTypes.DATE,
+				allowNull: true,
+			},
 		},
 		{
 			// Other model options go here
