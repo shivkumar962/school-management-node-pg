@@ -32,11 +32,20 @@ app.get('/', (req, res, next) => {
 	}
 });
 
-const taskRoute = require('./routes/taskRoute');
+
 const userRoute = require('./routes/userRoute');
 const designRoute = require('./routes/designRoute');
 const mediaRoute = require('./routes/mediaRoute');
-app.use([taskRoute, userRoute, designRoute, mediaRoute]); // you can add more routes in this array
+const studentRoute = require('./routes/studentRoute')
+app.use([ userRoute, designRoute, mediaRoute,
+	      studentRoute
+        ]); // you can add more routes in this array
+
+
+// const userRoute = require('./routes/userRoute');
+// const designRoute = require('./routes/designRoute');
+// const mediaRoute = require('./routes/mediaRoute');
+// app.use([ userRoute, designRoute, mediaRoute]); // you can add more routes in this array
 
 //404 error
 app.get('*', function (req, res) {

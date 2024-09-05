@@ -1,18 +1,21 @@
 const yup = require("yup");
-const { User } = require("../db");
-const { where, DATE , Op} = require("sequelize");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const prisma = require("../db.config")
 
 
 // Define the validation schema
 let userSchema = yup.object({
-  first_name: yup.string().required("First name is required"),
-  last_name: yup.string().required("Last name is required"),
+  firstName: yup.string().required("First name is required"),
+  lastName: yup.string().required("Last name is required"),
   email: yup
     .string()
     .email("Invalid email format")
     .required("Email is required"),
+    phone: yup
+    .string()
+    .min(10, "phone number must be at least 10 characters ")
+    .required("Phone number is required"),
   password: yup
     .string()
     .min(8, "Password must be at least 8 characters long")
@@ -39,14 +42,14 @@ module.exports.isUserExistsSignup = async (req, res, next) => {
   console.log("isUserExistsSignup", req.body);
 
   try {
-    const user = await User.findOne({
+    const user = await prisma.User.findUnique({
       where: {
         email: req.body.email,
         //   password: req.body.password,
       },
     });
 
-    // console.log("user===", user);
+    console.log("user===", user);
 
     if (user) {
       return res.json({ status: false, message: "user already exists" });

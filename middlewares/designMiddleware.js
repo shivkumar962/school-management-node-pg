@@ -1,6 +1,4 @@
 let yup = require("yup");
-const { Designs } = require("../db");
-const { Op } = require("sequelize");
 // console.log("🐞 design middleware======>>>>>");
 
 // ========================================================================

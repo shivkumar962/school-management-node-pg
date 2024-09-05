@@ -1,8 +1,4 @@
 require("dotenv").config();
-// Load model
-const { Designs, Media } = require("../db");
-const { Op } = require("sequelize");
-
 const utils = require("../utils");
 const nodemailer = require("nodemailer");
 var formidable = require("formidable");

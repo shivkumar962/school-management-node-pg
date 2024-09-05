@@ -1,60 +1,106 @@
-const { User } = require("../db");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
-const { where } = require("sequelize");
+const prisma = require("../db.config.js");
+
+
+
+module.exports.userGetAllData = async (req, res, next) => {
+  try {
+
+    const userAllData = await prisma.user.findMany();
+
+    return res.json({ status: true, data: userAllData });
+
+  } catch (error) {
+    
+    return res.status(500).json({ status: false, message: error.message });
+  }
+};
+
+
+
 
 module.exports.signUp = async (req, res, next) => {
-  // console.log("signup success");
+  console.log("Entry signup ===>", req.body);
 
   try {
     let salt = await bcrypt.genSalt(10);
     let hashedPassword = await bcrypt.hash(req.body.password, salt);
-    // console.log("salt==", salt);
-    // console.log("hashedPassword==", hashedPassword);
 
     var token = crypto.randomBytes(16).toString("hex");
 
-    const user = User.create({
-      first_name: req.body.first_name,
-      last_name: req.body.last_name,
-      email: req.body.email,
-      password: hashedPassword,
-      token: token,
-    });
-
-    // res.json({ status: true, message: "registration successfull 😊" });
-
-    //send email
-
-    const transporter = nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
-      auth: {
-        user: "ofelia.oreilly55@ethereal.email",
-        pass: "v7bZNmbQS9eDAWXKTM",
+    const user = await prisma.user.create({
+      data: {
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        phone: req.body.phone,
+        role: "STUDENT",
+        token: token,
+        password: hashedPassword,
       },
     });
 
-    const verificationLink = `http://localhost:3000/user/signup/verify/${token}`;
+    console.log("signup user", user);
 
-    const info = await transporter.sendMail({
-      from: '"send email 👻" <ofelia.oreilly55@ethereal.email>', // sender address
-      to: req.body.email, // list of receivers
-      subject: "Hello ✔", // Subject line
-      text: "Hello world?", // plain text body
-      html: `Congratulations!<br/><br/>
-        You have successfully signed up. Please click the link below to verify your account:<br/>
-        <a href="${verificationLink}" target="_blank">Verify email</a><br/><br/>
-        Thank you.`, // html body
+    // Set up Nodemailer transporter
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      secure: true,
+      port: 465,
+      auth: {
+        user: "shivamalviya84@gmail.com",
+        pass: "pfdx qxsw xujt wtwf", // Ensure this is an app-specific password
+      },
     });
 
-    // console.log("Message sent: %s", info.messageId);
-    // Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@ethereal.email>
+    // const verificationLink = `http://localhost:3000/user/signup/verify/${token}`;
+    const verifyButton = `http://localhost:3001/verify/${token}`;
 
-    return res.json({ status: true, message: "registration successfull 😊" });
+    // Send email
+    const info = await transporter.sendMail({
+      from: '"Bangel 👻" <shivamalviya84@gmail.com>', // sender address
+      to: req.body.email, // list of receivers
+      subject: "Email Verification ✔", // Subject line
+      text: "Please verify your email", // plain text body
+      html: `
+        <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
+          <h2 style="color: #333;">Congratulations!</h2>
+          <p style="font-size: 16px; color: #555;">
+            You have successfully signed up. Please click the button below to verify your account:
+          </p>
+          <a href="${verifyButton}" target="_blank" style="
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 5px;
+            text-decoration: none;
+            ">
+            Verify Email
+          </a>
+          <p style="font-size: 14px; color: #777; margin-top: 20px;">
+            If you did not create this account, please ignore this email.
+          </p>
+          <p style="font-size: 14px; color: #777; margin-top: 20px;">
+            Thank you,
+            <br/>The Team
+          </p>
+        </div>
+      `, // HTML body
+    });
+
+    console.log("Message sent: %s", info.messageId);
+
+    return res.json({ status: true, message: "registration successful 😊" });
   } catch (error) {
     console.log(error);
+    return res
+      .status(500)
+      .json({ status: false, message: "Registration failed 😞" });
   }
 };
 
@@ -63,30 +109,30 @@ module.exports.signUpVerify = async (req, res, next) => {
 
   try {
     const token = req.params.token;
-    console.log("token =>=>=>", token);
+    console.log("token =>=>=>ww", token);
 
     if (token) {
-      const verify = await User.findOne({
+      const verify = await prisma.user.findFirst({
         where: {
           token: token,
         },
       });
-      console.log("verify =>=>=>", verify.token);
+      console.log("verify =>=>=>", verify);
       if (verify) {
-        const is_verified = await User.update(
-          {
-            is_verified: true,
-            token: null,
+        const is_verified = await prisma.user.update({
+          where: {
+            token: verify.token,
           },
-          {
-            where: {
-              token: verify.token,
-            },
-          }
-        );
+
+          data: {
+            is_verified: true,
+            // token: null,
+          },
+        });
 
         return res.json({ status: true, message: "User verified" });
       }
+      return res.json({ status: false, message: "user not verified" });
     }
 
     return res.json({ status: false, message: "user not verified" });
@@ -99,7 +145,7 @@ module.exports.loginJWT = async (req, res, next) => {
   console.log("validateLogin =>=>=>");
 
   try {
-    const user = await User.findOne({
+    const user = await prisma.user.findUnique({
       where: {
         email: req.body.email,
       },
@@ -134,15 +180,16 @@ module.exports.loginJWT = async (req, res, next) => {
 
     console.log("user token  ====>>>", token);
 
-    const userLogin = await User.update(
-      {
+    const userLogin = await prisma.user.update({
+      where: {
+        token: user.token,
+      },
+
+      data: {
         loginToken: token,
         loginExpiry: expiryTime,
       },
-      {
-        where: { token: user.token },
-      }
-    );
+    });
 
     return res.json({
       status: true,
@@ -159,10 +206,10 @@ module.exports.loginJWT = async (req, res, next) => {
 };
 
 module.exports.login = async (req, res, next) => {
-  console.log("validateLogin =>=>=>");
+  console.log("validateLogin =>=>=>", req.body);
 
   try {
-    const user = await User.findOne({
+    const user = await prisma.user.findFirst({
       where: {
         email: req.body.email,
       },
@@ -195,24 +242,31 @@ module.exports.login = async (req, res, next) => {
 
     console.log("user token  ====>>>", token);
 
-    const userLogin = await User.update(
-      {
+    const userLogin = await prisma.user.update({
+      where: {
+        token: user.token,
+      },
+      data: {
         loginToken: token,
         loginExpiry: expiryTime,
       },
-      {
-        where: { token: user.token },
-      }
-    );
+    });
 
-    console.log('userLogin--->>>',userLogin);
-    
+    const userDetail = await prisma.user.findFirst({
+      where: {
+        loginToken: token,
+      },
+    });
+    console.log("userLogin detail--->>>", userDetail);
+
     return res.json({
       status: true,
       message: "login successfull",
-      user: user,
+      user: userDetail,
     });
   } catch (error) {
+    console.log(error);
+    
     return res.json({
       status: false,
       message: "server error",

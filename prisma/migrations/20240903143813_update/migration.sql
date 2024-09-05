@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "loginExpiry" DROP NOT NULL,
+ALTER COLUMN "loginToken" DROP NOT NULL;
