@@ -56,13 +56,13 @@ model Student {
 
 model Staff {
   id          Int         @id @default(autoincrement())
-  staffNumber String      @unique
+  staffNumber String      
   dob         DateTime
   gender      Gender
   hireDate    DateTime    @default(now())
   role        StaffRole
   salary      Float
-  user        User        @relation(fields: [userId], references: [id])
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      Int         @unique
   classes     Class[]     @relation("ClassTeacher")
   Course      Course[]
@@ -74,7 +74,7 @@ model Parent {
   id                    Int       @id @default(autoincrement())
   occupation            String?
   relationshipToStudent String
-  user                  User      @relation(fields: [userId], references: [id])
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId                Int       @unique
   students              Student[]
 }

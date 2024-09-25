@@ -15,15 +15,15 @@ const studentController = require("../controllers/studentController")
 // const mediaController = require("../controllers/studentController");
 
 
-router.get('/students', getAllStudentValidation);
+router.get('/students', getAllStudentValidation , studentController.getAllStudent);
 
-router.get('/students/:id', getByIdStudentValidation);
+router.get('/students/:id', getByIdStudentValidation, studentController.getByIdStudent);
 
 router.post('/students', postStudentValidation , studentController.createStudent);
 
-router.put('/students/:id', updateStudentValidation);
+router.put('/students/:id', updateStudentValidation, studentController.updateByIdStudent);
 
-router.delete('/students/:id', deleteStudentValidation);
+router.delete('/students/:id', deleteStudentValidation, studentController.deleteByIdStudent);
 
 // router.post("/addMediaImage",mediaUploadMiddleware.uploadMedia(constants.mediaTypes.design) , mediaController.addMediaImage);
 

@@ -3,23 +3,17 @@ const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const prisma = require("../db.config.js");
 
-
-
 module.exports.userGetAllData = async (req, res, next) => {
+  console.log("userGetAllData");
+  
   try {
-
     const userAllData = await prisma.user.findMany();
 
     return res.json({ status: true, data: userAllData });
-
   } catch (error) {
-    
     return res.status(500).json({ status: false, message: error.message });
   }
 };
-
-
-
 
 module.exports.signUp = async (req, res, next) => {
   console.log("Entry signup ===>", req.body);
@@ -266,11 +260,68 @@ module.exports.login = async (req, res, next) => {
     });
   } catch (error) {
     console.log(error);
-    
+
     return res.json({
       status: false,
       message: "server error",
       error: error,
     });
+  }
+};
+
+module.exports.updateUser = async (req, res) => {
+  const { firstName, lastName, phone } = req.body;
+  console.log("body data", req.body);
+
+  try {
+    if (!req.params.id) {
+      return res.json({ status: false, message: "Something wrong" });
+    }
+    const userUpdate = await prisma.user.update({
+      where: {
+        id: Number(req.params.id),
+      },
+      data: {
+        firstName: firstName,
+        lastName: lastName,
+        phone: phone,
+      },
+    });
+    console.log("userUpdate==", userUpdate);
+
+    return res.json({ status: true, message: "User update sucessfully" });
+  } catch (error) {
+    console.log(error);
+    return res.json({ status: false, error });
+  }
+};
+
+module.exports.userdelete = async (req, res) => {
+  console.log("body data", req.params);
+
+  try {
+    if (!req.params.id) {
+      return res.json({ status: false, message: "Something wrong" });
+    }
+    const exiestUser = await prisma.user.findFirst({
+      where: {
+        id: Number(req.params.id),
+      },
+    });
+    if (!exiestUser) {
+      return res.json({ status: false, message: "User not exiext" });
+
+    }
+    const userDelete = await prisma.user.delete({
+      where: {
+        id: Number(req.params.id),
+      },
+    });
+    console.log("userDelete==", userDelete);
+
+    return res.json({ status: true, message: "User delete sucessfully" });
+  } catch (error) {
+    console.log(error);
+    return res.json({ status: false, error });
   }
 };

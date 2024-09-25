@@ -1,8 +1,7 @@
 const yup = require("yup");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const prisma = require("../db.config")
-
+const prisma = require("../db.config");
 
 // Define the validation schema
 let userSchema = yup.object({
@@ -12,7 +11,7 @@ let userSchema = yup.object({
     .string()
     .email("Invalid email format")
     .required("Email is required"),
-    phone: yup
+  phone: yup
     .string()
     .min(10, "phone number must be at least 10 characters ")
     .required("Phone number is required"),
@@ -84,34 +83,63 @@ module.exports.validateLogin = async (req, res, next) => {
   }
 };
 
-
 // state full auth check
 module.exports.isAuthenticated = async (req, res, next) => {
-	var token = req.headers.authorization;
-  console.log('isAuthenticated--->>> ',token);
-  
-	if (token) {
-		// verifies secret and checks if the token is expired
+  var token = req.headers.authorization;
+  console.log("isAuthenticated--->>> ", token);
+
+  if (token) {
+    // verifies secret and checks if the token is expired
 
     const user = await User.findOne({
       where: {
         loginToken: token,
         loginExpiry: {
-          [Op.gt]: new Date(Date.now()) 
-        }
+          [Op.gt]: new Date(Date.now()),
+        },
       },
     });
     // console.log("user date 1===",new Date(Date.now()));
     // console.log("user date 2===", new Date(Date.now() + 60 * 60 * 1000));
 
-
     if (!user) {
       return res.json({ status: false, message: "un authenticated user" });
     }
     next();
-	} else {
-		let err = new Error('Unauthorized');
-		err.field = 'login';
-		return next(err);
-	}
+  } else {
+    let err = new Error("Unauthorized");
+    err.field = "login";
+    return next(err);
+  }
+};
+
+let updateValidation = yup.object({
+  firstName: yup.string().required("First name is required"),
+  lastName: yup.string().required("Last name is required"),
+  phone: yup.string().required("Phone number is required"),
+});
+module.exports.validateUpdateUser = async (req, res, next) => {
+  console.log("validateUpdateUser===user table");
+
+  try {
+    await updateValidation.validate(req.body);
+    next();
+  } catch (error) {
+    console.log(error);
+    return res.json({ status: false, message: "All field required" });
+  }
+};
+
+let userSchemaValidateDelete = yup.object({
+  id: yup.number().required("Id is required"),
+});
+
+module.exports.validateDelete = async (req, res, next) => {
+  try {
+    await userSchemaValidateDelete.validate(req.params);
+    next();
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ status: false, message: error.message }); // Return Yup's error message
+  }
 };

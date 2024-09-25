@@ -1,15 +1,24 @@
 const { object, string, number, date, InferType } = require("yup");
 
 module.exports.getAllStudentValidation = (req, res, next) => {
-  console.log("student ===", req.body);
+  // console.log("student ===", req.body);
 
-  return res.json("get all student");
+  next();
 };
 
+let userSchemaGetByIdStudentValidation = object({
+  id: string().required("Id is required"),
+});
 module.exports.getByIdStudentValidation = (req, res, next) => {
-  console.log("student ===", req.body);
+  // console.log("student ===", req.params);
 
-  return res.json("get by id student");
+  try {
+    userSchemaGetByIdStudentValidation.validate(req.params);
+    next();
+  } catch (error) {
+    console.log(error);
+    return res.json({ status: false, error: error, message: "Server error" });
+  }
 };
 
 let userSchema = object({
@@ -18,29 +27,37 @@ let userSchema = object({
   gender: string().required("Gender is required"),
   enrollmentDate: string().required("EnrollmentDate is required"),
 });
-
 module.exports.postStudentValidation = async (req, res, next) => {
-  console.log("student ===", req.body);
+  // console.log("student ===", req.body);
 
   try {
-
     await userSchema.validate(req.body);
     next();
-    
   } catch (error) {
     console.log(error);
     return res.json({ status: false, error: error });
   }
 };
 
-module.exports.updateStudentValidation = (req, res, next) => {
-  console.log("student ===", req.body);
+module.exports.updateStudentValidation = async (req, res, next) => {
+  // console.log("student ===", req.body);
 
-  return res.json("update student");
+  try {
+    await userSchemaGetByIdStudentValidation.validate(req.params);
+    next();
+  } catch (error) {
+    console.log(error);
+    return res.json({ status: false, error: error });
+  }
 };
 
-module.exports.deleteStudentValidation = (req, res, next) => {
+module.exports.deleteStudentValidation = async (req, res, next) => {
   console.log("student ===", req.body);
-
-  return res.json("delete student");
+  try {
+    await userSchemaGetByIdStudentValidation.validate(req.params);
+    next();
+  } catch (error) {
+    console.log(error);
+    return res.json({ status: false, message: "server error" });
+  }
 };
