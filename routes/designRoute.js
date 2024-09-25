@@ -10,6 +10,8 @@ const {
   validationDelete,
 } = require("../middlewares/designMiddleware");
 
+const {isAuthenticated} = require('../middlewares/userMiddleware')
+
 const mediaUploadMiddleware = require('../middlewares/mediaUploadMiddleware');
 const constants = require('../constants');
 // Define your route
@@ -17,15 +19,18 @@ const constants = require('../constants');
 // Import Controllers
 const designController = require("../controllers/designController");
 
-router.get("/design", designController.getAll);
+// TODO: request params validation
+router.get("/design", isAuthenticated ,designController.getAll);
 
-router.get("/design/:id", designController.getOne);
+router.get("/design/:id",isAuthenticated, designController.getOne);
+
+router.get("/designgetById/:id",isAuthenticated, designController.getById); //design table getById with media left join  
 
 router.post("/design", mediaUploadMiddleware.uploadMedia(constants.mediaTypes.design) , validationCreate, isDesignExistsCreate, designController.create);
 
-router.put("/design", [validationUpdate], designController.update);
+// router.post("/addNewDesignImage", mediaUploadMiddleware.uploadMedia(constants.mediaTypes.design),[validationUpdate], designController.addNewDesignImage); //add new designImage
 
-router.delete("/design", [validationDelete], designController.delete);
+router.delete("/design",isAuthenticated, [validationDelete], designController.delete);
 
 router.post("/design/update_picture", designController.updatePicture);//extra route
 

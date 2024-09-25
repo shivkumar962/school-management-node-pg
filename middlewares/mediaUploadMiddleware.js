@@ -1,5 +1,5 @@
 const constants = require('../constants');
-console.log('constants-->>', constants);
+// console.log('constants-->>', constants);
 // multer file upload
 const multer = require("multer");
 const fs = require("fs");
@@ -28,7 +28,8 @@ const storageDesign = multer.diskStorage({
 
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix+"."+file.originalname.split(".")[1]);
+    const fileName = "des-" + uniqueSuffix+"."+file.originalname.split(".")[1];
+    cb(null, fileName);
     // console.log("📂file📂");
     
   },
@@ -39,7 +40,7 @@ const storageUserMedia = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, userUploadDir); // Use the dynamically created path
     },
-  
+    // 1972 73-> 365x24x60x60x1000
     filename: function (req, file, cb) {
       const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
       cb(null, file.fieldname + "-" + uniqueSuffix+"."+file.originalname.split(".")[1]);
@@ -48,7 +49,7 @@ const storageUserMedia = multer.diskStorage({
 
   
 // Create upload middleware for a single file
-const designUploader = multer({ storage: storageDesign }).single("designFile");
+const designUploader = multer({ storage: storageDesign }).array("designFile",12);
 
 // Create upload middleware for a single file
 const userMediaUploader = multer({ storage: storageUserMedia }).single("profile");

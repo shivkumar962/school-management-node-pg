@@ -1,348 +1,327 @@
-require('dotenv').config();
-// Load model
-const { User } = require('../db');
-const { Op } = require('sequelize');
+const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
+const prisma = require("../db.config.js");
 
-const utils = require('../utils');
-const nodemailer = require('nodemailer');
-const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
+module.exports.userGetAllData = async (req, res, next) => {
+  console.log("userGetAllData");
+  
+  try {
+    const userAllData = await prisma.user.findMany();
 
-// SignUp
+    return res.json({ status: true, data: userAllData });
+  } catch (error) {
+    return res.status(500).json({ status: false, message: error.message });
+  }
+};
+
 module.exports.signUp = async (req, res, next) => {
-	try {
-		const email = req.body.email;
+  console.log("Entry signup ===>", req.body);
 
-		// encrypt password
-		var salt = bcrypt.genSaltSync(10);
-		var hash = bcrypt.hashSync(req.body.password, salt);
-		const password = hash;
+  try {
+    let salt = await bcrypt.genSalt(10);
+    let hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-		const token = crypto.randomBytes(16).toString('hex');
+    var token = crypto.randomBytes(16).toString("hex");
 
-		const record = await User.create({
-			email: email,
-			password: password,
-			token: token,
-		});
+    const user = await prisma.user.create({
+      data: {
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        phone: req.body.phone,
+        role: "STUDENT",
+        token: token,
+        password: hashedPassword,
+      },
+    });
 
-		// Send the email
-		var transporter = nodemailer.createTransport({
-			host: process.env.MAIL_HOST,
-			port: process.env.MAIL_POST,
-			auth: {
-				user: process.env.MAIL_AUTH_USER,
-				pass: process.env.MAIL_AUTH_PASS,
-			},
-		});
-		var verificationLink = `${process.env.CLIENT_URL}/signup-verify/?token=${token}`;
+    console.log("signup user", user);
 
-		var mailOptions = {
-			from: process.env.MAIL_FROM,
-			to: email,
-			subject: 'Thank you for signing up',
-			html: `Congratulations!<br/><br/>
-        You have successfully signed up. Please click the link below to verify your account:<br/>
-        <a href="${verificationLink}" target="_blank">Verify email</a><br/><br/>
-        Thank you.`,
-		};
+    // Set up Nodemailer transporter
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      secure: true,
+      port: 465,
+      auth: {
+        user: "shivamalviya84@gmail.com",
+        pass: "pfdx qxsw xujt wtwf", // Ensure this is an app-specific password
+      },
+    });
 
-		await transporter.sendMail(mailOptions);
+    // const verificationLink = `http://localhost:3000/user/signup/verify/${token}`;
+    const verifyButton = `http://localhost:3001/verify/${token}`;
 
-		return res.json({
-			status: 'success',
-			result: {
-				record: record,
-			},
-		});
-	} catch (err) {
-		return next(err);
-	}
+    // Send email
+    const info = await transporter.sendMail({
+      from: '"Bangel 👻" <shivamalviya84@gmail.com>', // sender address
+      to: req.body.email, // list of receivers
+      subject: "Email Verification ✔", // Subject line
+      text: "Please verify your email", // plain text body
+      html: `
+        <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
+          <h2 style="color: #333;">Congratulations!</h2>
+          <p style="font-size: 16px; color: #555;">
+            You have successfully signed up. Please click the button below to verify your account:
+          </p>
+          <a href="${verifyButton}" target="_blank" style="
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 5px;
+            text-decoration: none;
+            ">
+            Verify Email
+          </a>
+          <p style="font-size: 14px; color: #777; margin-top: 20px;">
+            If you did not create this account, please ignore this email.
+          </p>
+          <p style="font-size: 14px; color: #777; margin-top: 20px;">
+            Thank you,
+            <br/>The Team
+          </p>
+        </div>
+      `, // HTML body
+    });
+
+    console.log("Message sent: %s", info.messageId);
+
+    return res.json({ status: true, message: "registration successful 😊" });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: false, message: "Registration failed 😞" });
+  }
 };
 
-// Verify Signup Link
 module.exports.signUpVerify = async (req, res, next) => {
-	try {
-		const token = req.params.token;
-		const user = await User.findOne({
-			where: {
-				token: token,
-				is_verified: 0,
-			},
-		});
+  // console.log("signUpVerify =>=>=>");
 
-		if (user) {
-			const record = await User.update(
-				{
-					token: '',
-					is_verified: 1,
-				},
-				{
-					where: {
-						id: {
-							[Op.eq]: user.id,
-						},
-					},
-				}
-			);
+  try {
+    const token = req.params.token;
+    console.log("token =>=>=>ww", token);
 
-			return res.json({
-				status: 'success',
-				result: user,
-			});
-		} else {
-			let err = new Error('Invalid token provided or user already verified');
-			err.field = 'token';
-			return next(err);
-		}
-	} catch (err) {
-		return next(err);
-	}
+    if (token) {
+      const verify = await prisma.user.findFirst({
+        where: {
+          token: token,
+        },
+      });
+      console.log("verify =>=>=>", verify);
+      if (verify) {
+        const is_verified = await prisma.user.update({
+          where: {
+            token: verify.token,
+          },
+
+          data: {
+            is_verified: true,
+            // token: null,
+          },
+        });
+
+        return res.json({ status: true, message: "User verified" });
+      }
+      return res.json({ status: false, message: "user not verified" });
+    }
+
+    return res.json({ status: false, message: "user not verified" });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
-// Login
+module.exports.loginJWT = async (req, res, next) => {
+  console.log("validateLogin =>=>=>");
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        email: req.body.email,
+      },
+    });
+
+    console.log("isUserExistsLogin==123>", user);
+    if (!user) {
+      return res.json({ status: false, message: "Invalid email" });
+    }
+
+    const isMatch = await bcrypt.compare(req.body.password, user.password);
+    console.log("isMatch==>", isMatch);
+
+    if (!isMatch) {
+      return res.json({
+        status: false,
+        message: "Invalid password",
+      });
+    }
+
+    if (!user.is_verified) {
+      return res.json({
+        status: false,
+        message: "user not verified",
+      });
+    }
+
+    const token = jwt.sign({ id: user.id }, "jwt_secret_key", {
+      expiresIn: "1h",
+    });
+    const expiryTime = new Date(Date.now() + 60 * 60 * 1000);
+
+    console.log("user token  ====>>>", token);
+
+    const userLogin = await prisma.user.update({
+      where: {
+        token: user.token,
+      },
+
+      data: {
+        loginToken: token,
+        loginExpiry: expiryTime,
+      },
+    });
+
+    return res.json({
+      status: true,
+      message: "login successfull",
+      user: user,
+    });
+  } catch (error) {
+    return res.json({
+      status: false,
+      message: "server error",
+      error: error,
+    });
+  }
+};
+
 module.exports.login = async (req, res, next) => {
-	try {
-		const email = req.body.email;
-		const password = req.body.password;
+  console.log("validateLogin =>=>=>", req.body);
 
-		const user = await User.findOne({
-			where: {
-				email: email,
-				is_verified: true,
-			},
-		});
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        email: req.body.email,
+      },
+    });
 
-		if (user) {
-			const isMatched = await bcrypt.compare(password, user.password);
+    console.log("isUserExistsLogin==123>", user);
+    if (!user) {
+      return res.json({ status: false, message: "Invalid email" });
+    }
 
-			if (isMatched === true) {
-				var userData = {
-					id: user.id,
-					email: user.email,
-					first_name: user.first_name,
-					last_name: user.last_name,
-					bio: user.bio,
-				};
-				return res.json({
-					user: userData,
-					token: jwt.sign(userData, process.env.AUTH_SECRET, {
-						expiresIn: '2h',
-					}), // Expires in 2 Hour
-				});
-			} else {
-				let err = new Error('Invalid email or password entered');
-				err.field = 'login';
-				return next(err);
-			}
-		} else {
-			let err = new Error('Invalid email or password entered');
-			err.field = 'login';
-			return next(err);
-		}
-	} catch (err) {
-		return next(err);
-	}
+    const isMatch = await bcrypt.compare(req.body.password, user.password);
+    console.log("isMatch==>", isMatch);
+
+    if (!isMatch) {
+      return res.json({
+        status: false,
+        message: "Invalid password",
+      });
+    }
+
+    if (!user.is_verified) {
+      return res.json({
+        status: false,
+        message: "user not verified",
+      });
+    }
+
+    const token = crypto.randomBytes(16).toString("hex");
+    const expiryTime = new Date(Date.now() + 60 * 60 * 1000);
+
+    console.log("user token  ====>>>", token);
+
+    const userLogin = await prisma.user.update({
+      where: {
+        token: user.token,
+      },
+      data: {
+        loginToken: token,
+        loginExpiry: expiryTime,
+      },
+    });
+
+    const userDetail = await prisma.user.findFirst({
+      where: {
+        loginToken: token,
+      },
+    });
+    console.log("userLogin detail--->>>", userDetail);
+
+    return res.json({
+      status: true,
+      message: "login successfull",
+      user: userDetail,
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.json({
+      status: false,
+      message: "server error",
+      error: error,
+    });
+  }
 };
 
-// Get Logged in user
-module.exports.getLoggedInUser = (req, res, next) => {
-	var token = req.headers.authorization;
-	if (token) {
-		// verifies secret and checks if the token is expired
-		jwt.verify(
-			token.replace(/^Bearer\s/, ''),
-			process.env.AUTH_SECRET,
-			(err, decoded) => {
-				if (err) {
-					let err = new Error('Unauthorized');
-					err.field = 'login';
-					return next(err);
-				} else {
-					return res.json({ status: 'success', user: decoded });
-				}
-			}
-		);
-	} else {
-		let err = new Error('Unauthorized');
-		err.field = 'login';
-		return next(err);
-	}
+module.exports.updateUser = async (req, res) => {
+  const { firstName, lastName, phone } = req.body;
+  console.log("body data", req.body);
+
+  try {
+    if (!req.params.id) {
+      return res.json({ status: false, message: "Something wrong" });
+    }
+    const userUpdate = await prisma.user.update({
+      where: {
+        id: Number(req.params.id),
+      },
+      data: {
+        firstName: firstName,
+        lastName: lastName,
+        phone: phone,
+      },
+    });
+    console.log("userUpdate==", userUpdate);
+
+    return res.json({ status: true, message: "User update sucessfully" });
+  } catch (error) {
+    console.log(error);
+    return res.json({ status: false, error });
+  }
 };
 
-// Update Profile
-module.exports.updateProfile = async (req, res, next) => {
-	try {
-		var id = req.user.id;
-		var first_name = req.body.first_name;
-		var last_name = req.body.last_name;
-		var bio = req.body.bio;
-		var email = req.body.email;
+module.exports.userdelete = async (req, res) => {
+  console.log("body data", req.params);
 
-		const result = User.update(
-			{
-				first_name: first_name,
-				last_name: last_name,
-				bio: bio,
-				email: email,
-			},
-			{
-				where: {
-					id: {
-						[Op.eq]: id,
-					},
-				},
-			}
-		);
+  try {
+    if (!req.params.id) {
+      return res.json({ status: false, message: "Something wrong" });
+    }
+    const exiestUser = await prisma.user.findFirst({
+      where: {
+        id: Number(req.params.id),
+      },
+    });
+    if (!exiestUser) {
+      return res.json({ status: false, message: "User not exiext" });
 
-		return res.json({
-			status: 'success',
-			result: req.body,
-		});
-	} catch (err) {
-		return next(err);
-	}
-};
+    }
+    const userDelete = await prisma.user.delete({
+      where: {
+        id: Number(req.params.id),
+      },
+    });
+    console.log("userDelete==", userDelete);
 
-// Change Password
-module.exports.changePassword = (req, res, next) => {
-	try {
-		var id = req.user.id;
-
-		// encrypt password
-		var salt = bcrypt.genSaltSync(10);
-		var hash = bcrypt.hashSync(req.body.new_password, salt);
-		const new_password = hash;
-
-		const result = User.update(
-			{
-				password: new_password,
-			},
-			{
-				where: {
-					id: {
-						[Op.eq]: id,
-					},
-				},
-			}
-		);
-
-		return res.json({
-			status: 'success',
-			result: req.user,
-		});
-	} catch (err) {
-		return next(err);
-	}
-};
-
-// Forgot Password
-module.exports.forgotPassword = async (req, res, next) => {
-	try {
-		var email = req.body.email;
-		var token = crypto.randomBytes(16).toString('hex');
-
-		const result = await User.update(
-			{
-				token: token,
-			},
-			{
-				where: {
-					email: {
-						[Op.eq]: email,
-					},
-				},
-			}
-		);
-
-		// Send the email
-		var transporter = nodemailer.createTransport({
-			host: process.env.MAIL_HOST,
-			port: process.env.MAIL_POST,
-			auth: {
-				user: process.env.MAIL_AUTH_USER,
-				pass: process.env.MAIL_AUTH_PASS,
-			},
-		});
-
-		var verificationLink = `${process.env.CLIENT_URL}/forgot-password-verify/?token=${token}`;
-
-		var mailOptions = {
-			from: process.env.MAIL_FROM,
-			to: email,
-			subject: 'Reset password',
-			html: `Hi there! <br/><br/>
-			Please click on the link below to reset your password:<br/>
-			<a href="${verificationLink}" target="_blank">${verificationLink}</a><br/><br/>
-			Thank You.`,
-		};
-
-		await transporter.sendMail(mailOptions);
-
-		return res.json({
-			status: 'success',
-			result: result,
-		});
-	} catch (err) {
-		return next(err);
-	}
-};
-
-// Forgot Password Verify Link
-module.exports.forgotPasswordVerify = async (req, res, next) => {
-	try {
-		var token = req.params.token;
-
-		const user = await User.findOne({
-			where: {
-				token: token,
-			},
-		});
-
-		if (user) {
-			return res.json({
-				message: 'Validation link passed',
-				type: 'success',
-			});
-		} else {
-			let err = new Error('Invalid token provided');
-			err.field = 'token';
-			return next(err);
-		}
-	} catch (err) {
-		return next(err);
-	}
-};
-
-// Reset Password
-module.exports.resetPassword = async (req, res, next) => {
-	try {
-		var token = req.body.token;
-		// encrypt password
-		var salt = bcrypt.genSaltSync(10);
-		var hash = bcrypt.hashSync(req.body.new_password, salt);
-		const new_password = hash;
-
-		const result = await User.update(
-			{
-				password: new_password,
-				token: '',
-			},
-			{
-				where: {
-					token: {
-						[Op.eq]: token,
-					},
-				},
-			}
-		);
-
-		return res.json({
-			status: 'success',
-			result: result,
-		});
-	} catch (err) {
-		return next(err);
-	}
+    return res.json({ status: true, message: "User delete sucessfully" });
+  } catch (error) {
+    console.log(error);
+    return res.json({ status: false, error });
+  }
 };

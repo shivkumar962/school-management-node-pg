@@ -1,0 +1,278 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 Int                  @id @default(autoincrement())
+  firstName          String
+  lastName           String
+  email              String               @unique
+  phone              String
+  is_verified        Boolean              @default(false)
+  token              String?              @unique
+  loginToken         String?              @unique
+  loginExpiry        DateTime?
+  address            String?
+  role               UserRole
+  password           String
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  Student            Student?
+  Staff              Staff?
+  Parent             Parent?
+  LibraryTransaction LibraryTransaction[]
+}
+
+model Student {
+  id                  Int                   @id @default(autoincrement())
+  admissionNumber     String                @unique
+  dob                 DateTime
+  gender              Gender
+  enrollmentDate      DateTime              @default(now())
+  status              StudentStatus         @default(ACTIVE)
+  class               Class?                @relation(fields: [classId], references: [id], onDelete: Cascade)
+  classId             Int?
+  parents             Parent?                @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  parentId            Int?
+  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId              Int                   @unique
+  Attendance          Attendance[]
+  Result              Result[]
+  Fee                 Fee[]
+  TransportAssignment TransportAssignment[]
+  HostelOccupant      HostelOccupant[]
+}
+
+model Staff {
+  id          Int         @id @default(autoincrement())
+  staffNumber String      
+  dob         DateTime
+  gender      Gender
+  hireDate    DateTime    @default(now())
+  role        StaffRole
+  salary      Float
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int         @unique
+  classes     Class[]     @relation("ClassTeacher")
+  Course      Course[]
+  Timetable   Timetable[]
+  Hostel      Hostel[]
+}
+
+model Parent {
+  id                    Int       @id @default(autoincrement())
+  occupation            String?
+  relationshipToStudent String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                Int       @unique
+  students              Student[]
+}
+
+model Class {
+  id             Int          @id @default(autoincrement())
+  className      String
+  section        String
+  classTeacher   Staff?       @relation("ClassTeacher", fields: [classTeacherId], references: [id])
+  classTeacherId Int
+  students       Student[]
+  timetable      Timetable[]
+  Attendance     Attendance[]
+}
+
+model Course {
+  id          Int         @id @default(autoincrement())
+  courseName  String
+  courseCode  String      @unique
+  description String?
+  credits     Int
+  staff       Staff       @relation(fields: [staffId], references: [id])
+  staffId     Int
+  exams       Exam[]
+  timetables  Timetable[]
+}
+
+model Attendance {
+  id        Int              @id @default(autoincrement())
+  date      DateTime
+  status    AttendanceStatus
+  student   Student          @relation(fields: [studentId], references: [id])
+  studentId Int
+  classId   Int
+  class     Class            @relation(fields: [classId], references: [id])
+  remarks   String?
+}
+
+model Exam {
+  id       Int      @id @default(autoincrement())
+  examName String
+  date     DateTime
+  course   Course   @relation(fields: [courseId], references: [id])
+  courseId Int
+  maxMarks Int
+  results  Result[]
+}
+
+model Result {
+  id            Int     @id @default(autoincrement())
+  marksObtained Int
+  grade         String
+  remarks       String?
+  student       Student @relation(fields: [studentId], references: [id])
+  studentId     Int
+  exam          Exam    @relation(fields: [examId], references: [id])
+  examId        Int
+}
+
+model Fee {
+  id        Int       @id @default(autoincrement())
+  amount    Float
+  dueDate   DateTime
+  paidDate  DateTime?
+  status    FeeStatus
+  feeType   FeeType
+  student   Student   @relation(fields: [studentId], references: [id])
+  studentId Int
+}
+
+model Timetable {
+  id        Int       @id @default(autoincrement())
+  dayOfWeek DayOfWeek
+  startTime DateTime
+  endTime   DateTime
+  class     Class     @relation(fields: [classId], references: [id])
+  classId   Int
+  course    Course    @relation(fields: [courseId], references: [id])
+  courseId  Int
+  staff     Staff     @relation(fields: [staffId], references: [id])
+  staffId   Int
+}
+
+model Library {
+  id           Int                  @id @default(autoincrement())
+  title        String
+  author       String
+  isbn         String               @unique
+  category     String?
+  quantity     Int
+  transactions LibraryTransaction[]
+}
+
+model LibraryTransaction {
+  id         Int           @id @default(autoincrement())
+  borrowDate DateTime
+  returnDate DateTime?
+  status     LibraryStatus
+  book       Library       @relation(fields: [bookId], references: [id])
+  bookId     Int
+  borrower   User          @relation(fields: [borrowerId], references: [id])
+  borrowerId Int
+}
+
+model Transport {
+  id         Int                   @id @default(autoincrement())
+  routeName  String
+  busNumber  String
+  driverName String
+  students   TransportAssignment[]
+}
+
+model TransportAssignment {
+  id          Int       @id @default(autoincrement())
+  student     Student   @relation(fields: [studentId], references: [id])
+  studentId   Int
+  transport   Transport @relation(fields: [transportId], references: [id])
+  transportId Int
+}
+
+model Hostel {
+  id         Int              @id @default(autoincrement())
+  roomNumber String
+  capacity   Int
+  warden     Staff            @relation(fields: [wardenId], references: [id])
+  wardenId   Int
+  occupants  HostelOccupant[]
+}
+
+model HostelOccupant {
+  id        Int       @id @default(autoincrement())
+  student   Student   @relation(fields: [studentId], references: [id])
+  studentId Int
+  hostel    Hostel    @relation(fields: [hostelId], references: [id])
+  hostelId  Int
+  startDate DateTime
+  endDate   DateTime?
+}
+
+// Enums
+enum UserRole {
+  STUDENT
+  STAFF
+  PARENT
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum StudentStatus {
+  ACTIVE
+  GRADUATED
+  TRANSFERRED
+  INACTIVE
+}
+
+enum StaffRole {
+  TEACHER
+  ADMIN
+  LIBRARIAN
+  DRIVER
+  WARDEN
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum FeeStatus {
+  PAID
+  UNPAID
+  PENDING
+}
+
+enum LibraryStatus {
+  BORROWED
+  RETURNED
+  LOST
+}
+
+enum FeeType {
+  TUITION
+  TRANSPORT
+  LIBRARY
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}

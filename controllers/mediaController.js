@@ -1,12 +1,10 @@
 require("dotenv").config();
-// Load model
-const { Media } = require("../db");
-const { Op } = require("sequelize");
 
 const utils = require("../utils");
 const nodemailer = require("nodemailer");
 var formidable = require("formidable");
 var fs = require("fs");
+const constants = require("../constants");
 
 // Get All
 module.exports.getAll = async (req, res, next) => {
@@ -24,14 +22,14 @@ module.exports.getAll = async (req, res, next) => {
 };
 
 // Get One
-module.exports.getOne = async (req, res, next) => {
+module.exports.getByDesignId = async (req, res, next) => {
   // console.log("design controller get one",req.body);
 
   try {
     const id = req.params.id;
-    const media = await Media.findOne({
+    const media = await Media.findAll({
       where: {
-        id: id,
+        designId: id,
       },
     });
     res.json({
@@ -43,189 +41,42 @@ module.exports.getOne = async (req, res, next) => {
   }
 };
 
-// Create
-module.exports.create = async (req, res, next) => {
-  console.log("📂create data==", req.body);
-
-  try {
-    const record = await Media.create({
-      type: req.body.type,
-      designId: req.body.designId,
-      userId: req.body.userId,
-      recordStatus: req.body.recordStatus,
-      createdBy: req.body.createdBy,
-      updatedBy: req.body.updatedBy,
-    });
-    console.log("record ", record);
-
-    res.json({
-      status: "success",
-      result: {
-        record: record,
-      },
-    });
-  } catch (err) {
-    return next(err);
-  }
-};
-
-// Update
-module.exports.update = async (req, res, next) => {
-//   console.log("design update",req.body)
-  try {
-    const record = await Media.update(
-      {
-        id: req.body.id,
-        type: req.body.type,
-        designId: req.body.designId,
-        userId: req.body.userId,
-        recordStatus: req.body.recordStatus,
-        createdBy: req.body.createdBy,
-        updatedBy: req.body.updatedBy,
-      },
-      {
-        // where: {
-        // 	id: {
-        // 		[Op.eq]: id,
-        // 	},
-        // },
-        where: {
-          id: req.body.id,
-        },
-      }
-    );
-
-    res.json({
-      status: "success",
-      result: {
-        record: record,
-      },
-    });
-  } catch (err) {
-    return next(err);
-  }
-};
-
-// Delete
-module.exports.delete = async (req, res, next) => {
-  console.log("❌ delete record ", req.body, "❌");
+// addMediaImage
+module.exports.addMediaImage = async (req, res, next) => {
+  console.log("addMediaImage controller ", req.body);
+  console.log("addMediaImage controller file", req.files[0].filename);
 
   try {
     const id = req.body.id;
+    const image = req.files[0].filename;
+    const type = constants.mediaTypes.design;
 
-    const deleted = await Media.destroy({
-      where: {
-        id: {
-          [Op.eq]: id,
-        },
-      },
+    const addMediaImage = await Media.create({
+      type: type,
+      designId: id,
+      image: image,
     });
+    console.log("addMediaImage-=-=-=", addMediaImage);
 
-    res.json({
-      status: "success",
-      result: {
-        affectedRows: deleted,
-      },
-    });
-  } catch (err) {
-    return next(err);
-  }
-};
+    const design = await Designs.findOne({ where: { id: id } });
+    console.log("design==", design.dataValues.image);
 
-// Update Picture
-module.exports.updatePicture = (req, res, next) => {
-  var form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    const id = fields.id;
+    if (design.dataValues.image) {
+      let imagesArray = design.dataValues.image || [];
+      console.log("imagesArray===", imagesArray);
 
-    if (!id) {
-      var err = new Error("ID not found.");
-      return next(err);
-    } else {
-      if (
-        files.filetoupload.name &&
-        !files.filetoupload.name.match(/\.(jpg|jpeg|png)$/i)
-      ) {
-        var err = new Error("Please select .jpg or .png file only");
-        return next(err);
-      } else if (files.filetoupload.size > 2097152) {
-        var err = new Error("Please select file size < 2mb");
-        return next(err);
-      } else {
-        var newFileName = utils.timestampFilename(files.filetoupload.name);
+      imagesArray.push(image);
+      console.log("imagesArray===", imagesArray);
 
-        var oldpath = files.filetoupload.path;
-        var newpath = __basedir + "/public/uploads/pictures/" + newFileName;
-        fs.rename(oldpath, newpath, function (err) {
-          if (err) {
-            return next(err);
-          }
+      await Designs.update({ image: imagesArray }, { where: { id: id } });
 
-          Designs.update(
-            {
-              picture: newFileName,
-            },
-            {
-              where: {
-                id: {
-                  [Op.eq]: id,
-                },
-              },
-            }
-          )
-            .then((updated) => {
-              res.json({
-                status: "success",
-                result: {
-                  newFileName: newFileName,
-                  affectedRows: updated,
-                },
-              });
-            })
-            .catch((err) => {
-              return next(err);
-            });
-        });
-      }
+      console.log("Updated images array:", imagesArray);
+
+      res.json({
+        status: "success",
+        result: addMediaImage,
+      });
     }
-  });
-};
-
-// Send email
-module.exports.sendEmail = async (req, res, next) => {
-  try {
-    const id = req.body.id;
-    const result = await Media.findOne({
-      where: {
-        id: id,
-      },
-    });
-
-    var transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,
-      port: process.env.MAIL_POST,
-      auth: {
-        user: process.env.MAIL_AUTH_USER,
-        pass: process.env.MAIL_AUTH_PASS,
-      },
-    });
-
-    var mailOptions = {
-      from: process.env.MAIL_FROM,
-      to: "test@example.com",
-      subject: "Test email",
-      html: `Hi there! <br/><br/>
-			This is just a test email from boilerplate code<br/><br/>
-			Your design is: ${result.design}<br/><br/>
-			Thank You.`,
-    };
-
-    await transporter.sendMail(mailOptions);
-
-    res.json({
-      status: "success",
-      result: result,
-    });
   } catch (err) {
     return next(err);
   }
