@@ -92,7 +92,8 @@ module.exports.createParent = async (req, res) => {
     // check user entries
     const exiextParent = await prisma.parent.findFirst({
       where: {
-        userId: userId,
+        // userId: userId,
+        occupation: occupation,
       },
     });
 
@@ -108,7 +109,7 @@ module.exports.createParent = async (req, res) => {
 
     const newParent = await prisma.parent.create({
       data: {
-        userId: Number(userId),
+        // userId: Number(userId),
         occupation,
         relationshipToStudent   
       },

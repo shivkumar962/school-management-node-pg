@@ -7,6 +7,7 @@ const {
 	isUserExistsSignup,
 	validateLogin,
 	validateUpdateUser,
+	validategetByIdUser,
 	validateDelete
 	
 } = require('../middlewares/userMiddleware');
@@ -23,6 +24,8 @@ router.get('/user/signup/verify/:token', usersController.signUpVerify); // verif
 router.post('/user/login', validateLogin, usersController.login);
 
 router.put('/user/update/:id', validateUpdateUser, usersController.updateUser);
+
+router.get('/user/getById/:id', validategetByIdUser, usersController.getByIdUser);
 
 router.delete('/user/delete/:id', validateDelete, usersController.userdelete);
 

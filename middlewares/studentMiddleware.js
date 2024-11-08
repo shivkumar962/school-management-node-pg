@@ -25,10 +25,10 @@ let userSchema = object({
   admissionNumber: string().required("AdmissionNumber is required"),
   dob: string().required("Date of birth required"),
   gender: string().required("Gender is required"),
-  enrollmentDate: string().required("EnrollmentDate is required"),
+  // enrollmentDate: string().required("EnrollmentDate is required"),
 });
 module.exports.postStudentValidation = async (req, res, next) => {
-  // console.log("student ===", req.body);
+  console.log("student ===", req.body);
 
   try {
     await userSchema.validate(req.body);

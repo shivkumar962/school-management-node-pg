@@ -23,13 +23,15 @@ let userSchema = yup.object({
 
 // Middleware function for validation
 module.exports.validationSignup = async (req, res, next) => {
-  console.log("validationSignup", req.body);
+  console.log("validationSignup===>", req.body);
 
   try {
     await userSchema.validate(req.body, { abortEarly: false });
 
     next();
   } catch (err) {
+    console.log("validationSignup",err);
+    
     return res.status(400).json({
       status: "error",
       errors: err.errors,
@@ -38,7 +40,7 @@ module.exports.validationSignup = async (req, res, next) => {
 };
 
 module.exports.isUserExistsSignup = async (req, res, next) => {
-  console.log("isUserExistsSignup", req.body);
+  console.log("isUserExistsSignup===>>.>", req.body);
 
   try {
     const user = await prisma.User.findUnique({
@@ -48,7 +50,7 @@ module.exports.isUserExistsSignup = async (req, res, next) => {
       },
     });
 
-    console.log("user===", user);
+    // console.log("user===", user);
 
     if (user) {
       return res.json({ status: false, message: "user already exists" });
@@ -86,7 +88,7 @@ module.exports.validateLogin = async (req, res, next) => {
 // state full auth check
 module.exports.isAuthenticated = async (req, res, next) => {
   var token = req.headers.authorization;
-  console.log("isAuthenticated--->>> ", token);
+  // console.log("isAuthenticated--->>> ", token);
 
   if (token) {
     // verifies secret and checks if the token is expired
@@ -119,7 +121,7 @@ let updateValidation = yup.object({
   phone: yup.string().required("Phone number is required"),
 });
 module.exports.validateUpdateUser = async (req, res, next) => {
-  console.log("validateUpdateUser===user table");
+  // console.log("validateUpdateUser===user table");
 
   try {
     await updateValidation.validate(req.body);
@@ -129,6 +131,22 @@ module.exports.validateUpdateUser = async (req, res, next) => {
     return res.json({ status: false, message: "All field required" });
   }
 };
+
+
+
+
+module.exports.validategetByIdUser = async (req, res, next) => {
+  // console.log('midelware validate get By Id User',res.params);
+   try {
+    next();
+  } catch (error) {
+    console.log(error);
+    return res.json({ status: false, message: "User Id required" });
+  }
+  
+}
+
+
 
 let userSchemaValidateDelete = yup.object({
   id: yup.number().required("Id is required"),

@@ -35,8 +35,8 @@ module.exports.getByIdclass = async (req, res) => {
 
 module.exports.updateByIdclass = async (req, res) => {
   const { className, section } = req.body;
-  console.log("updateByIdclass=req.body=", req.body);
-  console.log("updateByIdclass=req.params=", req.params);
+  // console.log("updateByIdclass=req.body=", req.body);
+  // console.log("updateByIdclass=req.params=", req.params);
 
   try {
     if (!req.params.id) {
@@ -52,7 +52,7 @@ module.exports.updateByIdclass = async (req, res) => {
         section,
       },
     });
-    console.log("updateclass==", updateclass);
+    // console.log("updateclass==", updateclass);
 
     return res.json({
       status: true,
@@ -65,7 +65,7 @@ module.exports.updateByIdclass = async (req, res) => {
 };
 
 module.exports.deleteByIdclass = async (req, res) => {
-  console.log("class ===", req.body);
+  // console.log("class ===", req.body);
   try {
     if (!req.params.id) {
       return res.json({ status: false, message: "Something wrong" });
@@ -84,7 +84,7 @@ module.exports.deleteByIdclass = async (req, res) => {
 
 // Create class
 module.exports.createclass = async (req, res) => {
-  console.log("createclass controller ", req.body);
+  // console.log("createclass controller ", req.body);
 
   const { className, section, classTeacherId } = req.body;
 
@@ -106,7 +106,7 @@ module.exports.createclass = async (req, res) => {
 
     const newclass = await prisma.class.create({
       data: {
-        classTeacherId: Number(classTeacherId),
+        // classTeacherId: Number(classTeacherId),
         className,
         section,
       },

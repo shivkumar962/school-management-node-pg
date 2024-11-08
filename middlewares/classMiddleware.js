@@ -26,7 +26,7 @@ let userSchema = object({
   section: string().required("Section is required"),
 });
 module.exports.postclassValidation = async (req, res, next) => {
-  console.log("class ===", req.body);
+  // console.log("class ===", req.body);
   try {
     await userSchema.validate(req.body);
     next();

@@ -90,6 +90,9 @@ module.exports.createStaff = async (req, res) => {
 
   const { staffNumber, dob, gender, role, salary, userId, enrollmentDate } = req.body;
 
+  const [day, month, year] = dob.split('/');
+const formattedDOB = new Date(`${year}-${month}-${day}`);
+
   try {
     // check user entries
     const exiextStaff = await prisma.staff.findFirst({
@@ -110,9 +113,9 @@ module.exports.createStaff = async (req, res) => {
 
     const newStaff = await prisma.staff.create({
       data: {
-        userId: Number(userId),
+        // userId: Number(userId),
         staffNumber,
-        dob: new Date(dob),
+        dob: formattedDOB,
         gender,
         role,
         salary: Number(salary),

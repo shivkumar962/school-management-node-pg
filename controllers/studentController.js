@@ -38,6 +38,12 @@ module.exports.updateByIdStudent = async (req, res) => {
   console.log("updateByIdStudent=req.body=",req.body);
   console.log("updateByIdStudent=req.params=",req.params);
   
+  const [day, month, year] = dob.split('/');
+  const formattedDob = new Date(`${year}-${month}-${day}`);  
+  
+  const [eday, emonth, eyear] = enrollmentDate.split('/');
+  const formattedEnrollmentDate = new Date(`${eyear}-${emonth}-${eday}`);
+  
   try {
     if (!req.params.id) {
       return res.json({ status: false, message: "Something wrong" });
@@ -61,9 +67,9 @@ module.exports.updateByIdStudent = async (req, res) => {
       },
       data: {
         admissionNumber: admissionNumber,
-        dob: new Date(dob) ,
-        gender: gender,
-        enrollmentDate: new Date(enrollmentDate),
+        dob: formattedDob ,
+        gender:gender,
+        enrollmentDate: formattedEnrollmentDate,
       },
     });
     console.log("updateStudent==",updateStudent);
@@ -101,9 +107,15 @@ module.exports.deleteByIdStudent = async (req, res) => {
 
 // Create Student
 module.exports.createStudent = async (req, res) => {
-  // console.log("createStudent controller ", req.body);
+  console.log("createStudent controller ", req.body);
 
-  const { admissionNumber, dob, gender, enrollmentDate, userId } = req.body;
+  const { admissionNumber, dob, gender, enrollmentDate } = req.body;
+
+  const [day, month, year] = dob.split('/');
+  const formattedDob = new Date(`${year}-${month}-${day}`);  
+  
+  const [eday, emonth, eyear] = enrollmentDate.split('/');
+  const formattedEnrollmentDate = new Date(`${eyear}-${emonth}-${eday}`);
 
   try {
     // check user entries by  email
@@ -125,11 +137,11 @@ module.exports.createStudent = async (req, res) => {
 
     const newStudent = await prisma.student.create({
       data: {
-        userId: Number(userId),
+        // userId: Number(userId),
         admissionNumber,
-        dob: new Date(dob),
-        gender,
-        enrollmentDate: new Date(enrollmentDate),
+        dob: formattedDob,
+        gender:gender.toUpperCase(),
+        enrollmentDate: formattedEnrollmentDate,
       },
     });
 

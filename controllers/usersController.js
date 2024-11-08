@@ -4,7 +4,7 @@ const nodemailer = require("nodemailer");
 const prisma = require("../db.config.js");
 
 module.exports.userGetAllData = async (req, res, next) => {
-  console.log("userGetAllData");
+  // console.log("userGetAllData");
   
   try {
     const userAllData = await prisma.user.findMany();
@@ -16,7 +16,7 @@ module.exports.userGetAllData = async (req, res, next) => {
 };
 
 module.exports.signUp = async (req, res, next) => {
-  console.log("Entry signup ===>", req.body);
+  // console.log("Entry signup ===>", req.body);
 
   try {
     let salt = await bcrypt.genSalt(10);
@@ -36,7 +36,7 @@ module.exports.signUp = async (req, res, next) => {
       },
     });
 
-    console.log("signup user", user);
+    // console.log("signup user", user);
 
     // Set up Nodemailer transporter
     const transporter = nodemailer.createTransport({
@@ -87,7 +87,7 @@ module.exports.signUp = async (req, res, next) => {
       `, // HTML body
     });
 
-    console.log("Message sent: %s", info.messageId);
+    // console.log("Message sent: %s", info.messageId);
 
     return res.json({ status: true, message: "registration successful 😊" });
   } catch (error) {
@@ -103,7 +103,7 @@ module.exports.signUpVerify = async (req, res, next) => {
 
   try {
     const token = req.params.token;
-    console.log("token =>=>=>ww", token);
+    // console.log("token =>=>=>ww", token);
 
     if (token) {
       const verify = await prisma.user.findFirst({
@@ -111,7 +111,7 @@ module.exports.signUpVerify = async (req, res, next) => {
           token: token,
         },
       });
-      console.log("verify =>=>=>", verify);
+      // console.log("verify =>=>=>", verify);
       if (verify) {
         const is_verified = await prisma.user.update({
           where: {
@@ -136,7 +136,7 @@ module.exports.signUpVerify = async (req, res, next) => {
 };
 
 module.exports.loginJWT = async (req, res, next) => {
-  console.log("validateLogin =>=>=>");
+  // console.log("validateLogin =>=>=>");
 
   try {
     const user = await prisma.user.findUnique({
@@ -145,13 +145,13 @@ module.exports.loginJWT = async (req, res, next) => {
       },
     });
 
-    console.log("isUserExistsLogin==123>", user);
+    // console.log("isUserExistsLogin==123>", user);
     if (!user) {
       return res.json({ status: false, message: "Invalid email" });
     }
 
     const isMatch = await bcrypt.compare(req.body.password, user.password);
-    console.log("isMatch==>", isMatch);
+    // console.log("isMatch==>", isMatch);
 
     if (!isMatch) {
       return res.json({
@@ -172,7 +172,7 @@ module.exports.loginJWT = async (req, res, next) => {
     });
     const expiryTime = new Date(Date.now() + 60 * 60 * 1000);
 
-    console.log("user token  ====>>>", token);
+    // console.log("user token  ====>>>", token);
 
     const userLogin = await prisma.user.update({
       where: {
@@ -200,7 +200,7 @@ module.exports.loginJWT = async (req, res, next) => {
 };
 
 module.exports.login = async (req, res, next) => {
-  console.log("validateLogin =>=>=>", req.body);
+  // console.log("validateLogin =>=>=>", req.body);
 
   try {
     const user = await prisma.user.findFirst({
@@ -209,13 +209,13 @@ module.exports.login = async (req, res, next) => {
       },
     });
 
-    console.log("isUserExistsLogin==123>", user);
+    // console.log("isUserExistsLogin==123>", user);
     if (!user) {
       return res.json({ status: false, message: "Invalid email" });
     }
 
     const isMatch = await bcrypt.compare(req.body.password, user.password);
-    console.log("isMatch==>", isMatch);
+    // console.log("isMatch==>", isMatch);
 
     if (!isMatch) {
       return res.json({
@@ -234,7 +234,7 @@ module.exports.login = async (req, res, next) => {
     const token = crypto.randomBytes(16).toString("hex");
     const expiryTime = new Date(Date.now() + 60 * 60 * 1000);
 
-    console.log("user token  ====>>>", token);
+    // console.log("user token  ====>>>", token);
 
     const userLogin = await prisma.user.update({
       where: {
@@ -251,7 +251,7 @@ module.exports.login = async (req, res, next) => {
         loginToken: token,
       },
     });
-    console.log("userLogin detail--->>>", userDetail);
+    // console.log("userLogin detail--->>>", userDetail);
 
     return res.json({
       status: true,
@@ -271,7 +271,7 @@ module.exports.login = async (req, res, next) => {
 
 module.exports.updateUser = async (req, res) => {
   const { firstName, lastName, phone } = req.body;
-  console.log("body data", req.body);
+  // console.log("body data", req.body);
 
   try {
     if (!req.params.id) {
@@ -287,7 +287,7 @@ module.exports.updateUser = async (req, res) => {
         phone: phone,
       },
     });
-    console.log("userUpdate==", userUpdate);
+    // console.log("userUpdate==", userUpdate);
 
     return res.json({ status: true, message: "User update sucessfully" });
   } catch (error) {
@@ -296,8 +296,35 @@ module.exports.updateUser = async (req, res) => {
   }
 };
 
+
+module.exports.getByIdUser = async(req, res) => {
+  // console.log('controller get By Id User');
+  // console.log("body data", req.params.id);
+
+  try {
+    if (!req.params.id) {
+      return res.json({ status: false, message: "Something wrong" });
+    }
+    const userGetById = await prisma.user.findFirst({
+      where: {
+        id: Number(req.params.id),
+      },
+    
+    });
+    // console.log("userGetById==", userGetById);
+
+    return res.json({ status: true, userData:userGetById });
+  } catch (error) {
+    console.log(error);
+    return res.json({ status: false, error });
+  }
+}
+
+
+
+
 module.exports.userdelete = async (req, res) => {
-  console.log("body data", req.params);
+  // console.log("body data", req.params);
 
   try {
     if (!req.params.id) {
@@ -317,7 +344,7 @@ module.exports.userdelete = async (req, res) => {
         id: Number(req.params.id),
       },
     });
-    console.log("userDelete==", userDelete);
+    // console.log("userDelete==", userDelete);
 
     return res.json({ status: true, message: "User delete sucessfully" });
   } catch (error) {

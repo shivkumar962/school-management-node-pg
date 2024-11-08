@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -19,19 +13,18 @@ model User {
   lastName           String
   email              String               @unique
   phone              String
-  is_verified        Boolean              @default(false)
-  token              String?              @unique
-  loginToken         String?              @unique
-  loginExpiry        DateTime?
   address            String?
   role               UserRole
   password           String
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
-  Student            Student?
-  Staff              Staff?
-  Parent             Parent?
+  token              String?              @unique
+  loginToken         String?              @unique
+  is_verified        Boolean              @default(false)
+  loginExpiry        DateTime?
   LibraryTransaction LibraryTransaction[]
+  // Parent             Parent?
+  // Staff              Staff?
 }
 
 model Student {
@@ -41,53 +34,51 @@ model Student {
   gender              Gender
   enrollmentDate      DateTime              @default(now())
   status              StudentStatus         @default(ACTIVE)
-  class               Class?                @relation(fields: [classId], references: [id], onDelete: Cascade)
-  classId             Int?
-  parents             Parent?                @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  parentId            Int?
-  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId              Int                   @unique
   Attendance          Attendance[]
-  Result              Result[]
   Fee                 Fee[]
-  TransportAssignment TransportAssignment[]
   HostelOccupant      HostelOccupant[]
+  Result              Result[]
+  // class               Class?                @relation(fields: [classId], references: [id], onDelete: Cascade)
+  // classId             Int?
+  // parents             Parent?               @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  // parentId            Int?
+  TransportAssignment TransportAssignment[]
 }
 
 model Staff {
   id          Int         @id @default(autoincrement())
-  staffNumber String      
+  staffNumber String
   dob         DateTime
   gender      Gender
   hireDate    DateTime    @default(now())
   role        StaffRole
   salary      Float
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      Int         @unique
-  classes     Class[]     @relation("ClassTeacher")
+  // classes     Class[]     @relation("ClassTeacher")
   Course      Course[]
-  Timetable   Timetable[]
   Hostel      Hostel[]
+  Timetable   Timetable[]
+  // user        User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // userId      Int?         @unique
 }
 
 model Parent {
   id                    Int       @id @default(autoincrement())
   occupation            String?
   relationshipToStudent String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId                Int       @unique
-  students              Student[]
+  // user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // userId                Int       @unique
+  // students              Student[]
 }
 
 model Class {
   id             Int          @id @default(autoincrement())
   className      String
   section        String
-  classTeacher   Staff?       @relation("ClassTeacher", fields: [classTeacherId], references: [id])
-  classTeacherId Int
-  students       Student[]
-  timetable      Timetable[]
   Attendance     Attendance[]
+  // classTeacher   Staff        @relation("ClassTeacher", fields: [classTeacherId], references: [id])
+  // classTeacherId Int
+  // students       Student[]
+  timetable      Timetable[]
 }
 
 model Course {
@@ -96,8 +87,8 @@ model Course {
   courseCode  String      @unique
   description String?
   credits     Int
-  staff       Staff       @relation(fields: [staffId], references: [id])
   staffId     Int
+  staff       Staff       @relation(fields: [staffId], references: [id])
   exams       Exam[]
   timetables  Timetable[]
 }
@@ -106,20 +97,20 @@ model Attendance {
   id        Int              @id @default(autoincrement())
   date      DateTime
   status    AttendanceStatus
-  student   Student          @relation(fields: [studentId], references: [id])
   studentId Int
   classId   Int
-  class     Class            @relation(fields: [classId], references: [id])
   remarks   String?
+  class     Class            @relation(fields: [classId], references: [id])
+  student   Student          @relation(fields: [studentId], references: [id])
 }
 
 model Exam {
   id       Int      @id @default(autoincrement())
   examName String
   date     DateTime
-  course   Course   @relation(fields: [courseId], references: [id])
   courseId Int
   maxMarks Int
+  course   Course   @relation(fields: [courseId], references: [id])
   results  Result[]
 }
 
@@ -128,10 +119,10 @@ model Result {
   marksObtained Int
   grade         String
   remarks       String?
-  student       Student @relation(fields: [studentId], references: [id])
   studentId     Int
-  exam          Exam    @relation(fields: [examId], references: [id])
   examId        Int
+  exam          Exam    @relation(fields: [examId], references: [id])
+  student       Student @relation(fields: [studentId], references: [id])
 }
 
 model Fee {
@@ -141,8 +132,8 @@ model Fee {
   paidDate  DateTime?
   status    FeeStatus
   feeType   FeeType
-  student   Student   @relation(fields: [studentId], references: [id])
   studentId Int
+  student   Student   @relation(fields: [studentId], references: [id])
 }
 
 model Timetable {
@@ -173,10 +164,10 @@ model LibraryTransaction {
   borrowDate DateTime
   returnDate DateTime?
   status     LibraryStatus
-  book       Library       @relation(fields: [bookId], references: [id])
   bookId     Int
-  borrower   User          @relation(fields: [borrowerId], references: [id])
   borrowerId Int
+  book       Library       @relation(fields: [bookId], references: [id])
+  borrower   User          @relation(fields: [borrowerId], references: [id])
 }
 
 model Transport {
@@ -189,32 +180,31 @@ model Transport {
 
 model TransportAssignment {
   id          Int       @id @default(autoincrement())
-  student     Student   @relation(fields: [studentId], references: [id])
   studentId   Int
-  transport   Transport @relation(fields: [transportId], references: [id])
   transportId Int
+  student     Student   @relation(fields: [studentId], references: [id])
+  transport   Transport @relation(fields: [transportId], references: [id])
 }
 
 model Hostel {
   id         Int              @id @default(autoincrement())
   roomNumber String
   capacity   Int
-  warden     Staff            @relation(fields: [wardenId], references: [id])
   wardenId   Int
+  warden     Staff            @relation(fields: [wardenId], references: [id])
   occupants  HostelOccupant[]
 }
 
 model HostelOccupant {
   id        Int       @id @default(autoincrement())
-  student   Student   @relation(fields: [studentId], references: [id])
   studentId Int
-  hostel    Hostel    @relation(fields: [hostelId], references: [id])
   hostelId  Int
   startDate DateTime
   endDate   DateTime?
+  hostel    Hostel    @relation(fields: [hostelId], references: [id])
+  student   Student   @relation(fields: [studentId], references: [id])
 }
 
-// Enums
 enum UserRole {
   STUDENT
   STAFF

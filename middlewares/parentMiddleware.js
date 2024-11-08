@@ -24,7 +24,7 @@ module.exports.getByIdParentValidation = (req, res, next) => {
 let userSchema = object({
   occupation: string().required("Occupation is required"),
   relationshipToStudent: string().required("Relationship to student is required"),
-  userId:number().required("Id is required")
+  // userId:number().required("Id is required")
 });
 module.exports.postParentValidation = async (req, res, next) => {
   console.log("Parent ===", req.body);
