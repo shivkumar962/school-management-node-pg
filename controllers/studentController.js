@@ -1,4 +1,5 @@
 const prisma = require("../db.config.js");
+const moment = require('moment');
 
 module.exports.getAllStudent = async (req, res) => {
   try {
@@ -38,11 +39,13 @@ module.exports.updateByIdStudent = async (req, res) => {
   console.log("updateByIdStudent=req.body=",req.body);
   console.log("updateByIdStudent=req.params=",req.params);
   
-  const [day, month, year] = dob.split('/');
-  const formattedDob = new Date(`${year}-${month}-${day}`);  
+  // const [day, month, year] = dob.split('/');
+  // const formattedDob = new Date(`${year}-${month}-${day}`);  
   
-  const [eday, emonth, eyear] = enrollmentDate.split('/');
-  const formattedEnrollmentDate = new Date(`${eyear}-${emonth}-${eday}`);
+  // const [eday, emonth, eyear] = enrollmentDate.split('/');
+  // const formattedEnrollmentDate = new Date(`${eyear}-${emonth}-${eday}`);
+  // const newDate = moment(dob).format('YYYY-MM-DD HH:MM:SS');
+  // console.log('newDate-->>llllll',newDate);
   
   try {
     if (!req.params.id) {
@@ -67,9 +70,9 @@ module.exports.updateByIdStudent = async (req, res) => {
       },
       data: {
         admissionNumber: admissionNumber,
-        dob: formattedDob ,
+        dob: dob ,
         gender:gender,
-        enrollmentDate: formattedEnrollmentDate,
+        enrollmentDate: enrollmentDate,
       },
     });
     console.log("updateStudent==",updateStudent);
