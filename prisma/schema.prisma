@@ -64,7 +64,6 @@ model Staff {
   role        StaffRole
   salary      Float
   // classes     Class[]     @relation("ClassTeacher")
-  Course      Course[]
   Hostel      Hostel[]
   Timetable   Timetable[]
   // user        User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -91,16 +90,12 @@ model Class {
   // timetable  Timetable[]
 }
 
-model Course {
+model Subject {
   id          Int         @id @default(autoincrement())
-  courseName  String
-  courseCode  String      @unique
-  description String?
-  credits     Int
-  staffId     Int
-  staff       Staff       @relation(fields: [staffId], references: [id])
+  subjectName  String
+  subjectCode  String      @unique
   // exams       Exam[]
-  timetables  Timetable[]
+  // timetables  Timetable[]
 }
 
 model Attendance {
@@ -152,8 +147,6 @@ model Timetable {
   endTime   DateTime
   // class     Class     @relation(fields: [classId], references: [id])
   // classId   Int
-  course    Course    @relation(fields: [courseId], references: [id])
-  courseId  Int
   staff     Staff     @relation(fields: [staffId], references: [id])
   staffId   Int
 }

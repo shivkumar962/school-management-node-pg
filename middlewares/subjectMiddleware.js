@@ -1,7 +1,7 @@
 const { object, string, number, date, InferType } = require("yup");
 
-module.exports.getAllExamValidation = (req, res, next) => {
-  // console.log("getAllExamValidation ===", req.body);
+module.exports.getAllSubjectValidation = (req, res, next) => {
+  console.log("getAllSubjectValidation ===", req.body);
   next();
 };
 
@@ -10,8 +10,8 @@ module.exports.getAllExamValidation = (req, res, next) => {
 let userSchemaGetByIdStudentValidation = object({
   id: string().required("Id is required"),
 });
-module.exports.getByIdExamValidation = (req, res, next) => {
-  // console.log("getByIdExamValidation ===", req.params);
+module.exports.getByIdSubjectValidation = (req, res, next) => {
+  // console.log("getByIdSubjectValidation ===", req.params);
 
   try {
     userSchemaGetByIdStudentValidation.validate(req.params);
@@ -26,10 +26,11 @@ module.exports.getByIdExamValidation = (req, res, next) => {
 
 
 let userSchema = object({
-  examName: string().required("Exam name is required"),
+  subjectName: string().required("Subject name is required"),
+  subjectCode: string().required("Subject code is required"),
 });
-module.exports.postExamValidation = async (req, res, next) => {
-  // console.log("postExamValidation ===", req.body);
+module.exports.postSubjectValidation = async (req, res, next) => {
+  // console.log("postSubjectValidation ===", req.body);
 
   try {
     await userSchema.validate(req.body);
@@ -43,8 +44,8 @@ module.exports.postExamValidation = async (req, res, next) => {
 
 
 
-module.exports.updateExamValidation = async (req, res, next) => {
-  // console.log("updateExamValidation ===", req.body);
+module.exports.updateSubjectValidation = async (req, res, next) => {
+  // console.log("updateSubjectValidation ===", req.body);
 
   try {
     await userSchemaGetByIdStudentValidation.validate(req.params);
@@ -58,8 +59,8 @@ module.exports.updateExamValidation = async (req, res, next) => {
 
 
 
-module.exports.deleteExamValidation = async (req, res, next) => {
-  // console.log("deleteExamValidation ===", req.body);
+module.exports.deleteSubjectValidation = async (req, res, next) => {
+  // console.log("deleteSubjectValidation ===", req.body);
 
   try {
     await userSchemaGetByIdStudentValidation.validate(req.params);

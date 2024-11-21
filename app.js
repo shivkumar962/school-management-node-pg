@@ -47,6 +47,7 @@ const staffRoute = require("./routes/staffRoute");
 const parentRoute = require("./routes/parentRoute");
 const classRoute = require("./routes/classRoute");
 const examRoute = require("./routes/examRoute");
+const subjectRoute = require("./routes/subjectRoute");
 app.use([
   userRoute,
   designRoute,
@@ -55,7 +56,8 @@ app.use([
   staffRoute,
   parentRoute,
   classRoute,
-  examRoute
+  examRoute,
+  subjectRoute,
 ]); // you can add more routes in this array
 
 // const userRoute = require('./routes/userRoute');
