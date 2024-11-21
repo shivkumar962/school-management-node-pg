@@ -1,9 +1,16 @@
+const { orderBy } = require("lodash");
 const prisma = require("../db.config.js");
-const moment = require('moment');
+const moment = require("moment");
 
 module.exports.getAllStudent = async (req, res) => {
   try {
-    const allStudent = await prisma.student.findMany();
+    const allStudent = await prisma.student.findMany({
+      orderBy:{
+        studentFullName:'asc'
+      }
+    }
+      
+    );
     if (!allStudent) {
       return res.json({ status: false, message: "No Students Found" });
     }
@@ -36,17 +43,17 @@ module.exports.getByIdStudent = async (req, res) => {
 
 module.exports.updateByIdStudent = async (req, res) => {
   const { admissionNumber, dob, gender, enrollmentDate } = req.body;
-  console.log("updateByIdStudent=req.body=",req.body);
-  console.log("updateByIdStudent=req.params=",req.params);
-  
+  console.log("updateByIdStudent=req.body=", req.body);
+  console.log("updateByIdStudent=req.params=", req.params);
+
   // const [day, month, year] = dob.split('/');
-  // const formattedDob = new Date(`${year}-${month}-${day}`);  
-  
+  // const formattedDob = new Date(`${year}-${month}-${day}`);
+
   // const [eday, emonth, eyear] = enrollmentDate.split('/');
   // const formattedEnrollmentDate = new Date(`${eyear}-${emonth}-${eday}`);
   // const newDate = moment(dob).format('YYYY-MM-DD HH:MM:SS');
   // console.log('newDate-->>llllll',newDate);
-  
+
   try {
     if (!req.params.id) {
       return res.json({ status: false, message: "Something wrong" });
@@ -70,13 +77,13 @@ module.exports.updateByIdStudent = async (req, res) => {
       },
       data: {
         admissionNumber: admissionNumber,
-        dob: dob ,
-        gender:gender,
+        dob: dob,
+        gender: gender,
         enrollmentDate: enrollmentDate,
       },
     });
-    console.log("updateStudent==",updateStudent);
-    
+    console.log("updateStudent==", updateStudent);
+
     return res.json({
       status: true,
       message: "Student successfully update",
@@ -86,7 +93,6 @@ module.exports.updateByIdStudent = async (req, res) => {
     return res.json({ status: false, error: error, message: "server error" });
   }
 };
-
 
 module.exports.deleteByIdStudent = async (req, res) => {
   console.log("student ===", req.body);
@@ -106,18 +112,31 @@ module.exports.deleteByIdStudent = async (req, res) => {
   }
 };
 
-
-
 // Create Student
 module.exports.createStudent = async (req, res) => {
-  console.log("createStudent controller ", req.body);
+  console.log("createStudent controller ==>", req.body);
 
-  const { admissionNumber, dob, gender, enrollmentDate } = req.body;
+  const {
+    studentFullName,
+    fatherName,
+    motherName,
+    contactNumber,
+    studentAadharCardNumber,
+    emailAddress,
+    dob,
+    enrollmentDate,
+    homeAddress,
+    addmitionInClass,
+    gender,
+    religion,
+    category,
+    admissionNumber,
+  } = req.body;
 
-  const [day, month, year] = dob.split('/');
-  const formattedDob = new Date(`${year}-${month}-${day}`);  
-  
-  const [eday, emonth, eyear] = enrollmentDate.split('/');
+  const [day, month, year] = dob.split("/");
+  const formattedDob = new Date(`${year}-${month}-${day}`);
+
+  const [eday, emonth, eyear] = enrollmentDate.split("/");
   const formattedEnrollmentDate = new Date(`${eyear}-${emonth}-${eday}`);
 
   try {
@@ -127,24 +146,45 @@ module.exports.createStudent = async (req, res) => {
         admissionNumber: admissionNumber,
       },
     });
+    const exiextStudentAadharCardNumber = await prisma.student.findFirst({
+      where: {
+        studentAadharCardNumber:studentAadharCardNumber
+      },
+    });
+    console.log("exiextStudent==", exiextStudent);
+    console.log("exiextStudentAadharCardNumber==", exiextStudentAadharCardNumber);
 
-    // console.log("exiextStudent==", exiextStudent);
-
-    if (exiextStudent) {
+    if (exiextStudent || exiextStudentAadharCardNumber) {
       // Agar student already exist karta hai
+      if(exiextStudent){
+          return res.json({
+          status: false,
+          message: "Student already exists, please use another Admission Number.",
+        })
+      }
       return res.json({
         status: false,
-        message: "Student already exists, please use another admission number.",
-      });
+        message: "Student already exists, please use another Student Aadhar Card Number.",
+      })
     }
-
+     
     const newStudent = await prisma.student.create({
       data: {
         // userId: Number(userId),
-        admissionNumber,
+        studentFullName: studentFullName,
+        fatherName: fatherName,
+        motherName: motherName,
+        contactNumber: contactNumber,
+        studentAadharCardNumber: studentAadharCardNumber,
+        emailAddress: emailAddress,
         dob: formattedDob,
-        gender:gender.toUpperCase(),
         enrollmentDate: formattedEnrollmentDate,
+        homeAddress: homeAddress,
+        addmitionInClass: addmitionInClass,
+        gender: gender.toUpperCase(),
+        religion: religion,
+        category: category,
+        admissionNumber: admissionNumber,
       },
     });
 

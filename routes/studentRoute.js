@@ -6,7 +6,8 @@ const {
        getByIdStudentValidation,
        postStudentValidation,
        updateStudentValidation,
-       deleteStudentValidation
+       deleteStudentValidation,
+       
       } = require("../middlewares/studentMiddleware")
 
 const studentController = require("../controllers/studentController")

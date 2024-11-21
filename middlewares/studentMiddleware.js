@@ -61,3 +61,4 @@ module.exports.deleteStudentValidation = async (req, res, next) => {
     return res.json({ status: false, message: "server error" });
   }
 };
+

@@ -2,7 +2,13 @@ const prisma = require("../db.config.js");
 
 module.exports.getAllclass = async (req, res) => {
   try {
-    const allclass = await prisma.class.findMany();
+    const allclass = await prisma.class.findMany(
+      {
+        orderBy: {
+          className: 'asc',
+        },
+      }
+    );
     if (!allclass) {
       return res.json({ status: false, message: "No classs Found" });
     }

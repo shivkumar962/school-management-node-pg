@@ -28,21 +28,31 @@ model User {
 }
 
 model Student {
-  id                  Int                   @id @default(autoincrement())
-  admissionNumber     String                @unique
-  dob                 DateTime
-  gender              Gender
-  enrollmentDate      DateTime              @default(now())
-  status              StudentStatus         @default(ACTIVE)
-  Attendance          Attendance[]
-  Fee                 Fee[]
-  HostelOccupant      HostelOccupant[]
-  Result              Result[]
+  id                      Int                   @id @default(autoincrement())
+  studentFullName         String?
+  fatherName              String?
+  motherName              String?
+  contactNumber           String?
+  studentAadharCardNumber String?               @unique
+  emailAddress            String?
+  admissionNumber         String?               @unique
+  addmitionInClass        String?
+  dob                     DateTime
+  gender                  Gender
+  enrollmentDate          DateTime              @default(now())
+  religion                String?
+  category                String?
+  homeAddress             String?
+  status                  StudentStatus         @default(ACTIVE)
+  Attendance              Attendance[]
+  Fee                     Fee[]
+  HostelOccupant          HostelOccupant[]
+  Result                  Result[]
   // class               Class?                @relation(fields: [classId], references: [id], onDelete: Cascade)
   // classId             Int?
   // parents             Parent?               @relation(fields: [parentId], references: [id], onDelete: Cascade)
   // parentId            Int?
-  TransportAssignment TransportAssignment[]
+  TransportAssignment     TransportAssignment[]
 }
 
 model Staff {
@@ -62,7 +72,7 @@ model Staff {
 }
 
 model Parent {
-  id                    Int       @id @default(autoincrement())
+  id                    Int     @id @default(autoincrement())
   occupation            String?
   relationshipToStudent String
   // user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -71,14 +81,14 @@ model Parent {
 }
 
 model Class {
-  id             Int          @id @default(autoincrement())
-  className      String
-  section        String
-  Attendance     Attendance[]
+  id        Int    @id @default(autoincrement())
+  className String
+  section   String
+  // Attendance Attendance[]
   // classTeacher   Staff        @relation("ClassTeacher", fields: [classTeacherId], references: [id])
   // classTeacherId Int
   // students       Student[]
-  timetable      Timetable[]
+  // timetable  Timetable[]
 }
 
 model Course {
@@ -89,7 +99,7 @@ model Course {
   credits     Int
   staffId     Int
   staff       Staff       @relation(fields: [staffId], references: [id])
-  exams       Exam[]
+  // exams       Exam[]
   timetables  Timetable[]
 }
 
@@ -98,20 +108,19 @@ model Attendance {
   date      DateTime
   status    AttendanceStatus
   studentId Int
-  classId   Int
   remarks   String?
-  class     Class            @relation(fields: [classId], references: [id])
+  // class     Class            @relation(fields: [classId], references: [id])
+  // classId   Int
   student   Student          @relation(fields: [studentId], references: [id])
 }
 
 model Exam {
   id       Int      @id @default(autoincrement())
   examName String
-  date     DateTime
-  courseId Int
-  maxMarks Int
-  course   Course   @relation(fields: [courseId], references: [id])
-  results  Result[]
+  // date     DateTime @default(now())
+  // course   Course   @relation(fields: [courseId], references: [id])
+  // courseId Int 
+  // results  Result[]
 }
 
 model Result {
@@ -120,8 +129,8 @@ model Result {
   grade         String
   remarks       String?
   studentId     Int
-  examId        Int
-  exam          Exam    @relation(fields: [examId], references: [id])
+  // exam          Exam    @relation(fields: [examId], references: [id])
+  // examId        Int
   student       Student @relation(fields: [studentId], references: [id])
 }
 
@@ -141,8 +150,8 @@ model Timetable {
   dayOfWeek DayOfWeek
   startTime DateTime
   endTime   DateTime
-  class     Class     @relation(fields: [classId], references: [id])
-  classId   Int
+  // class     Class     @relation(fields: [classId], references: [id])
+  // classId   Int
   course    Course    @relation(fields: [courseId], references: [id])
   courseId  Int
   staff     Staff     @relation(fields: [staffId], references: [id])
