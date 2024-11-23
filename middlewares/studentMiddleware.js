@@ -28,7 +28,7 @@ let userSchema = object({
   // enrollmentDate: string().required("EnrollmentDate is required"),
 });
 module.exports.postStudentValidation = async (req, res, next) => {
-  console.log("student ===", req.body);
+  // console.log("student ===", req.body);
 
   try {
     await userSchema.validate(req.body);
@@ -52,7 +52,7 @@ module.exports.updateStudentValidation = async (req, res, next) => {
 };
 
 module.exports.deleteStudentValidation = async (req, res, next) => {
-  console.log("student ===", req.body);
+  // console.log("student ===", req.body);
   try {
     await userSchemaGetByIdStudentValidation.validate(req.params);
     next();

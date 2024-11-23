@@ -8,21 +8,24 @@ datasource db {
 }
 
 model User {
-  id                 Int                  @id @default(autoincrement())
+  id                 Int                   @id @default(autoincrement())
   firstName          String
   lastName           String
-  email              String               @unique
+  email              String                @unique
   phone              String
   address            String?
   role               UserRole
   password           String
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  token              String?              @unique
-  loginToken         String?              @unique
-  is_verified        Boolean              @default(false)
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  token              String?               @unique
+  loginToken         String?               @unique
+  is_verified        Boolean               @default(false)
   loginExpiry        DateTime?
   LibraryTransaction LibraryTransaction[]
+  // classStudentMapping ClassStudentMapping[]
+  // createdMappings    ClassStudentMapping[] @relation("CreatedBy")
+  // updatedMappings    ClassStudentMapping[] @relation("UpdatedBy")
   // Parent             Parent?
   // Staff              Staff?
 }
@@ -102,17 +105,24 @@ model Subject {
 
 model ClassStudentMapping {
   id           Int      @id @default(autoincrement())
-  studentId    Int
-  classId      Int
-  createdBy    Int
-  updatedBy    Int
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   recordStatus String   @default("active") // Possible values: 'active', 'inactive'
 
-  // Relations (if needed in future)
-  class   Class   @relation(fields: [classId], references: [id])
-  student Student @relation(fields: [studentId], references: [id])
+  createdBy Int    
+  updatedBy Int
+
+  // Relationships
+  // userCreated User    @relation("CreatedBy", fields: [createdBy], references: [id])
+  // userUpdated User    @relation("UpdatedBy", fields: [updatedBy], references: [id])
+  class     Class   @relation(fields: [classId], references: [id])
+  classId   Int
+  student   Student @relation(fields: [studentId], references: [id])
+  studentId Int
+  // User      User?   @relation(fields: [userId], references: [id])
+  // userId    Int?
+  // User      User?   @relation(fields: [userId], references: [id])
+  // userId    Int?
 }
 
 model Attendance {

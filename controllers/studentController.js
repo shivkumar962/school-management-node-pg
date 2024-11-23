@@ -5,12 +5,10 @@ const moment = require("moment");
 module.exports.getAllStudent = async (req, res) => {
   try {
     const allStudent = await prisma.student.findMany({
-      orderBy:{
-        studentFullName:'asc'
-      }
-    }
-      
-    );
+      orderBy: {
+        studentFullName: "asc",
+      },
+    });
     if (!allStudent) {
       return res.json({ status: false, message: "No Students Found" });
     }
@@ -131,6 +129,7 @@ module.exports.createStudent = async (req, res) => {
     religion,
     category,
     admissionNumber,
+    classId,
   } = req.body;
 
   const [day, month, year] = dob.split("/");
@@ -148,26 +147,28 @@ module.exports.createStudent = async (req, res) => {
     });
     const exiextStudentAadharCardNumber = await prisma.student.findFirst({
       where: {
-        studentAadharCardNumber:studentAadharCardNumber
+        studentAadharCardNumber: studentAadharCardNumber,
       },
     });
-    console.log("exiextStudent==", exiextStudent);
-    console.log("exiextStudentAadharCardNumber==", exiextStudentAadharCardNumber);
+    // console.log("exiextStudent==", exiextStudent);
+    // console.log("exiextStudentAadharCardNumber==", exiextStudentAadharCardNumber);
 
     if (exiextStudent || exiextStudentAadharCardNumber) {
       // Agar student already exist karta hai
-      if(exiextStudent){
-          return res.json({
+      if (exiextStudent) {
+        return res.json({
           status: false,
-          message: "Student already exists, please use another Admission Number.",
-        })
+          message:
+            "Student already exists, please use another Admission Number.",
+        });
       }
       return res.json({
         status: false,
-        message: "Student already exists, please use another Student Aadhar Card Number.",
-      })
+        message:
+          "Student already exists, please use another Student Aadhar Card Number.",
+      });
     }
-     
+
     const newStudent = await prisma.student.create({
       data: {
         // userId: Number(userId),
@@ -185,6 +186,15 @@ module.exports.createStudent = async (req, res) => {
         religion: religion,
         category: category,
         admissionNumber: admissionNumber,
+      },
+    });
+
+    const classStudentModel = await prisma.classStudentMapping.create({
+      data: {
+        classId: Number(classId),
+        studentId: Number(newStudent.id),
+        createdBy: 0,
+        updatedBy: 0,
       },
     });
 
