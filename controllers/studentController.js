@@ -3,41 +3,64 @@ const prisma = require("../db.config.js");
 const moment = require("moment");
 
 module.exports.getAllStudent = async (req, res) => {
+  console.log("paramId", req.params);
+
   try {
-    const allStudent = await prisma.student.findMany({
-      orderBy: {
-        studentFullName: "asc",
-      },
-    });
-    if (!allStudent) {
+    const where = {};
+    let result = null;
+
+    if (req.params.studentId) {
+      result = await prisma.student.findFirst({
+            where: {
+              id: Number(req.params.studentId),
+            },
+          });
+    } 
+    else if(req.params.classId) {
+      result = await prisma.student.findMany({
+        where: {
+          currentClassId: Number(req.params.classId),
+        },
+      });
+    }else{
+      result = await prisma.student.findMany();
+    }
+
+
+    // if (req.params.studentId) {
+    //   // console.log("getByIdStudent===");
+    //   where.id = Number(req.params.studentId);
+    //   result = await prisma.student.findFirst({
+    //     where: {
+    //       id: Number(req.params.studentId),
+    //       currentClassId: currentClassId
+    //     },
+    //   });
+    //   // console.log("getByIdStudent===", getByIdStudent);
+    // } else {
+      
+    //   result = await prisma.student.findMany({
+    //     where: {
+    //       currentClassId: currentClassId,
+    //     },
+    //   });
+    // }
+
+
+    console.log('result==',result);
+
+    if (!result) {
       return res.json({ status: false, message: "No Students Found" });
     }
 
-    return res.json({ status: true, data: allStudent });
+    return res.json({ status: true, data: result });
   } catch (error) {
     console.log(error);
     return res.json({ status: false, error: error, message: "server error" });
   }
 };
 
-module.exports.getByIdStudent = async (req, res) => {
-  try {
-    if (!req.params.id) {
-      return res.json({ status: false, message: "somthing wrong" });
-    }
 
-    const getByIdStudent = await prisma.student.findFirst({
-      where: {
-        id: Number(req.params.id),
-      },
-    });
-
-    return res.json({ status: true, data: getByIdStudent });
-  } catch (error) {
-    console.log(error);
-    return res.json({ status: false, error: error, message: "server error" });
-  }
-};
 
 module.exports.updateByIdStudent = async (req, res) => {
   const { admissionNumber, dob, gender, enrollmentDate } = req.body;
@@ -92,6 +115,8 @@ module.exports.updateByIdStudent = async (req, res) => {
   }
 };
 
+
+
 module.exports.deleteByIdStudent = async (req, res) => {
   console.log("student ===", req.body);
   try {
@@ -110,6 +135,7 @@ module.exports.deleteByIdStudent = async (req, res) => {
   }
 };
 
+
 // Create Student
 module.exports.createStudent = async (req, res) => {
   console.log("createStudent controller ==>", req.body);
@@ -124,7 +150,7 @@ module.exports.createStudent = async (req, res) => {
     dob,
     enrollmentDate,
     homeAddress,
-    addmitionInClass,
+    currentClassId,
     gender,
     religion,
     category,
@@ -181,7 +207,7 @@ module.exports.createStudent = async (req, res) => {
         dob: formattedDob,
         enrollmentDate: formattedEnrollmentDate,
         homeAddress: homeAddress,
-        addmitionInClass: addmitionInClass,
+        currentClassId: Number(currentClassId),
         gender: gender.toUpperCase(),
         religion: religion,
         category: category,
@@ -191,7 +217,7 @@ module.exports.createStudent = async (req, res) => {
 
     const classStudentModel = await prisma.classStudentMapping.create({
       data: {
-        classId: Number(classId),
+        classId: Number(currentClassId),
         studentId: Number(newStudent.id),
         createdBy: 0,
         updatedBy: 0,

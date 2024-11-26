@@ -8,19 +8,19 @@ datasource db {
 }
 
 model User {
-  id                 Int                   @id @default(autoincrement())
+  id                 Int                  @id @default(autoincrement())
   firstName          String
   lastName           String
-  email              String                @unique
+  email              String               @unique
   phone              String
   address            String?
   role               UserRole
   password           String
-  createdAt          DateTime              @default(now())
-  updatedAt          DateTime              @updatedAt
-  token              String?               @unique
-  loginToken         String?               @unique
-  is_verified        Boolean               @default(false)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  token              String?              @unique
+  loginToken         String?              @unique
+  is_verified        Boolean              @default(false)
   loginExpiry        DateTime?
   LibraryTransaction LibraryTransaction[]
   // classStudentMapping ClassStudentMapping[]
@@ -39,7 +39,7 @@ model Student {
   studentAadharCardNumber String?               @unique
   emailAddress            String?
   admissionNumber         String?               @unique
-  addmitionInClass        String?
+  currentClassId          Int?
   dob                     DateTime
   gender                  Gender
   enrollmentDate          DateTime              @default(now())
@@ -88,6 +88,7 @@ model Class {
   className           String
   section             String
   classStudentMapping ClassStudentMapping[]
+  classSubjectMapping ClassSubjectMapping[]
   // Attendance Attendance[]
   // classTeacher   Staff        @relation("ClassTeacher", fields: [classTeacherId], references: [id])
   // classTeacherId Int
@@ -99,6 +100,7 @@ model Subject {
   id          Int    @id @default(autoincrement())
   subjectName String
   subjectCode String @unique
+  classSubjectMapping ClassSubjectMapping[]
   // exams       Exam[]
   // timetables  Timetable[]
 }
@@ -109,7 +111,7 @@ model ClassStudentMapping {
   updatedAt    DateTime @updatedAt
   recordStatus String   @default("active") // Possible values: 'active', 'inactive'
 
-  createdBy Int    
+  createdBy Int
   updatedBy Int
 
   // Relationships
@@ -123,6 +125,21 @@ model ClassStudentMapping {
   // userId    Int?
   // User      User?   @relation(fields: [userId], references: [id])
   // userId    Int?
+}
+
+model ClassSubjectMapping {
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  recordStatus String   @default("active") // Possible values: 'active', 'inactive'
+
+  createdBy Int
+  updatedBy Int
+
+  class     Class @relation(fields: [classId], references: [id])
+  classId   Int
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  subjectId Int
 }
 
 model Attendance {

@@ -1,7 +1,7 @@
 const { object, string, number, date, InferType } = require("yup");
 
 module.exports.getAllStudentValidation = (req, res, next) => {
-  // console.log("student ===", req.body);
+  console.log("student middleware===", req.params);
 
   next();
 };

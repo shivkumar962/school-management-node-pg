@@ -3,7 +3,6 @@ const router = Router();
 // import {studentValidation} from "../middlewares/studentMiddleware"
 const { 
        getAllStudentValidation,
-       getByIdStudentValidation,
        postStudentValidation,
        updateStudentValidation,
        deleteStudentValidation,
@@ -16,9 +15,7 @@ const studentController = require("../controllers/studentController")
 // const mediaController = require("../controllers/studentController");
 
 
-router.get('/students', getAllStudentValidation , studentController.getAllStudent);
-
-router.get('/students/:id', getByIdStudentValidation, studentController.getByIdStudent);
+router.get('/students/:classId?/:studentId?', getAllStudentValidation , studentController.getAllStudent);
 
 router.post('/students', postStudentValidation , studentController.createStudent);
 
