@@ -97,9 +97,9 @@ model Class {
 }
 
 model Subject {
-  id          Int    @id @default(autoincrement())
-  subjectName String
-  subjectCode String @unique
+  id                  Int                   @id @default(autoincrement())
+  subjectName         String
+  subjectCode         String                @unique
   classSubjectMapping ClassSubjectMapping[]
   // exams       Exam[]
   // timetables  Timetable[]
@@ -114,9 +114,6 @@ model ClassStudentMapping {
   createdBy Int
   updatedBy Int
 
-  // Relationships
-  // userCreated User    @relation("CreatedBy", fields: [createdBy], references: [id])
-  // userUpdated User    @relation("UpdatedBy", fields: [updatedBy], references: [id])
   class     Class   @relation(fields: [classId], references: [id])
   classId   Int
   student   Student @relation(fields: [studentId], references: [id])
@@ -128,18 +125,18 @@ model ClassStudentMapping {
 }
 
 model ClassSubjectMapping {
-  id           Int      @id @default(autoincrement())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  recordStatus String   @default("active") // Possible values: 'active', 'inactive'
+  id Int @id @default(autoincrement())
 
-  createdBy Int
-  updatedBy Int
-
-  class     Class @relation(fields: [classId], references: [id])
+  class     Class   @relation(fields: [classId], references: [id])
   classId   Int
   subject   Subject @relation(fields: [subjectId], references: [id])
   subjectId Int
+  createdBy Int
+  updatedBy Int
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  recordStatus String   @default("active") // Possible values: 'active', 'inactive' -- 0,1
 }
 
 model Attendance {

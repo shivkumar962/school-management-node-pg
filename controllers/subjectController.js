@@ -3,29 +3,69 @@ const prisma = require("../db.config.js");
 const moment = require("moment");
 
 module.exports.getAllSubject = async (req, res) => {
-  console.log("getAllSubject==>>>123");
+  console.log("getAllSubject==>>>123", req.params, "query==", req.query);
+
+  let result = null;
 
   try {
-    const allSubject = await prisma.subject.findMany({
-      orderBy:{
-        subjectName:'asc'
-      }
-    });
-    if (!allSubject) {
+    if (req.query.classId) {
+      console.log("iffff==",req.query.classId);
+      
+      result = await prisma.classSubjectMapping.findMany({
+        where:{
+          classId: Number(req.query.classId)
+        },
+        include: {
+          subject: true,
+          class: true,
+        },
+      });
+      
+    } else {
+      console.log("else==");
+
+      result = await prisma.subject.findMany({
+        orderBy: {
+          subjectName: "asc",
+        },
+      });
+    }
+
+    if (!result) {
       return res.json({ status: false, message: "No Subjects Found" });
     }
 
-    return res.json({ status: true, data: allSubject });
+    return res.json({ status: true, data: result });
   } catch (error) {
     console.log(error);
     return res.json({ status: false, error: error, message: "server error" });
   }
 };
 
+// module.exports.getAllSubjectByClass = async (req, res) => {
+//   console.log("getAllSubject==>>>123");
+//   try {
+//     const allSubject = await prisma.subject.findMany({
+//       orderBy:{
+//         subjectName:'asc'
+//       },
+
+//     });
+//     if (!allSubject) {
+//       return res.json({ status: false, message: "No Subjects Found" });
+//     }
+
+//     return res.json({ status: true, data: allSubject });
+//   } catch (error) {
+//     console.log(error);
+//     return res.json({ status: false, error: error, message: "server error" });
+//   }
+// };
+
 module.exports.getByIdSubject = async (req, res) => {
-  console.log("enter getByIdSubject-->nkk");
-  
-  
+  console.log("enter getByIdSubject-->nkk", req.params, "query==", req.query);
+  // http://localhost:3000/subject/class-subject?classId=12
+
   try {
     if (!req.params.id) {
       return res.json({ status: false, message: "somthing wrong" });
@@ -37,10 +77,9 @@ module.exports.getByIdSubject = async (req, res) => {
         id: Number(req.params.id),
       },
     });
-    console.log("end getByIdSubject-->",getByIdSubjects);
+    console.log("end getByIdSubject-->", getByIdSubjects);
 
     return res.json({ status: true, data: getByIdSubjects });
-
   } catch (error) {
     console.log(error);
     return res.json({ status: false, error: error, message: "server error" });
@@ -48,7 +87,6 @@ module.exports.getByIdSubject = async (req, res) => {
 };
 
 module.exports.updateByIdSubject = async (req, res) => {
-
   const { subjectName, subjectCode } = req.body;
   console.log("updateByIdSubject=req.body=", req.body);
   console.log("updateByIdSubject=req.params=", req.params);
@@ -64,7 +102,7 @@ module.exports.updateByIdSubject = async (req, res) => {
       },
       data: {
         subjectName: subjectName,
-        subjectCode: subjectCode
+        subjectCode: subjectCode,
       },
     });
     console.log("updateSubject==", updateSubject);
@@ -80,7 +118,6 @@ module.exports.updateByIdSubject = async (req, res) => {
 };
 
 module.exports.deleteByIdSubject = async (req, res) => {
-
   console.log("Subject ===", req.body);
   try {
     if (!req.params.id) {
@@ -92,7 +129,6 @@ module.exports.deleteByIdSubject = async (req, res) => {
       },
     });
     return res.json({ status: true, message: "Subject delete successfully" });
-    
   } catch (error) {
     console.log(error);
     return res.json({ status: false, message: "server error" });
@@ -100,38 +136,42 @@ module.exports.deleteByIdSubject = async (req, res) => {
 };
 
 // Create Subject
-  module.exports.createSubject = async (req, res) => {
-    console.log("createSubject controller ==>", req.body);
-  
-    const { subjectName , subjectCode} = req.body;
-  
-    try {
-      // Check if Subject already exists
-      const exiextSubject = await prisma.subject.findFirst({
-        where: { subjectCode:subjectCode },
-      });
-      if (exiextSubject) {
-        
-        // Subject exists, response and stop further execution
-        return res.json({ status: false, message: "Subject code already exists, please use another Subject code.",});
-      }
-  
-      // Create new Subject
-      const newSubject = await prisma.subject.create({
+module.exports.createSubject = async (req, res) => {
+  console.log("createSubject controller ==>", req.body);
 
-        data: { 
-                subjectName: subjectName,
-                subjectCode:subjectCode
-              },
-      });
-  
-      // Send success response
-      return res.json({ status: true, message: "Created new Subject", subject: newSubject,});
+  const { subjectName, subjectCode } = req.body;
 
-    } catch (error) {
-      console.error(error);
-      // Error response
-      return res.json({  status: false, message: "Server error",});
+  try {
+    // Check if Subject already exists
+    const exiextSubject = await prisma.subject.findFirst({
+      where: { subjectCode: subjectCode },
+    });
+    if (exiextSubject) {
+      // Subject exists, response and stop further execution
+      return res.json({
+        status: false,
+        message:
+          "Subject code already exists, please use another Subject code.",
+      });
     }
-  };
-  
+
+    // Create new Subject
+    const newSubject = await prisma.subject.create({
+      data: {
+        subjectName: subjectName,
+        subjectCode: subjectCode,
+      },
+    });
+
+    // Send success response
+    return res.json({
+      status: true,
+      message: "Created new Subject",
+      subject: newSubject,
+    });
+  } catch (error) {
+    console.error(error);
+    // Error response
+    return res.json({ status: false, message: "Server error" });
+  }
+};

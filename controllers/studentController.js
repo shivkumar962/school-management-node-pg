@@ -3,52 +3,67 @@ const prisma = require("../db.config.js");
 const moment = require("moment");
 
 module.exports.getAllStudent = async (req, res) => {
-  console.log("paramId", req.params);
+  console.log("param Idddd", req.params);
+  console.log("query Idddd", req.query);
 
   try {
     const where = {};
     let result = null;
+    const studentId = req.params.studentId ? parseInt(req.params.studentId) : null;
+    const classId = req.params.classId ? parseInt(req.params.classId) : null;
+    const currentClassId = req.query.currentClassId ? parseInt(req.query.currentClassId) : null;
 
-    if (req.params.studentId) {
+    if(currentClassId){
+      console.log("Enter====currentClassId");
+
+     const result = await prisma.classStudentMapping.findMany({
+      where: {
+        classId: currentClassId, 
+      },
+      include: {
+        student: true, 
+        class: {
+          select: {
+            className: true, 
+            section: true,  
+          },
+        },
+      },
+    });
+    console.log("studentsInClassddddssss====",result);
+     return res.json({status:true, data:result})
+    }
+
+    if (studentId) {
+      console.log("studentId====studentId");
+
       result = await prisma.student.findFirst({
             where: {
               id: Number(req.params.studentId),
+              currentClassId: classId
             },
           });
-    } 
-    else if(req.params.classId) {
+    } else {
+      console.log("else====else");
+
+      const whereCondi = {
+        currentClassId: Number(req.params.classId),
+      }
+
+      if(req.query.admissionNumber) {
+        whereCondi.admissionNumber = req.query.admissionNumber;
+      }
+
       result = await prisma.student.findMany({
-        where: {
-          currentClassId: Number(req.params.classId),
-        },
+        where: whereCondi
       });
-    }else{
-      result = await prisma.student.findMany();
     }
 
-
-    // if (req.params.studentId) {
-    //   // console.log("getByIdStudent===");
-    //   where.id = Number(req.params.studentId);
-    //   result = await prisma.student.findFirst({
-    //     where: {
-    //       id: Number(req.params.studentId),
-    //       currentClassId: currentClassId
-    //     },
-    //   });
-    //   // console.log("getByIdStudent===", getByIdStudent);
-    // } else {
-      
-    //   result = await prisma.student.findMany({
-    //     where: {
-    //       currentClassId: currentClassId,
-    //     },
-    //   });
-    // }
-
-
-    console.log('result==',result);
-
+    if(!studentId && !classId && !currentClassId && !currentClassId){
+      result = await prisma.student.findMany();
+      console.log('result==',result);  
+    }
+   
     if (!result) {
       return res.json({ status: false, message: "No Students Found" });
     }

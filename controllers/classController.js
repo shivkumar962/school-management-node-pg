@@ -21,6 +21,7 @@ module.exports.getAllclass = async (req, res) => {
 };
 
 module.exports.getByIdclass = async (req, res) => {
+  // console.log("req.params===>",req.params);
   try {
     if (!req.params.id) {
       return res.json({ status: false, message: "somthing wrong" });
