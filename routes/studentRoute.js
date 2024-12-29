@@ -15,7 +15,7 @@ const studentController = require("../controllers/studentController")
 // const mediaController = require("../controllers/studentController");
 
 
-router.get('/students/:classId?/:studentId?', getAllStudentValidation , studentController.getAllStudent);
+router.get('/students/:studentId?', getAllStudentValidation , studentController.getAllStudent);
 
 router.post('/students', postStudentValidation , studentController.createStudent);
 

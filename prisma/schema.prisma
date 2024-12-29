@@ -150,7 +150,7 @@ model Attendance {
   student   Student          @relation(fields: [studentId], references: [id])
 }
 
-model Exam {
+model ExamList {
   id       Int    @id @default(autoincrement())
   examName String
   // date     DateTime @default(now())

@@ -54,7 +54,7 @@ module.exports.signUp = async (req, res, next) => {
 
     // Send email
     const info = await transporter.sendMail({
-      from: '"Bangel 👻" <shivamalviya84@gmail.com>', // sender address
+      from: '"School 🎓" <shivamalviya84@gmail.com>', // sender address
       to: req.body.email, // list of receivers
       subject: "Email Verification ✔", // Subject line
       text: "Please verify your email", // plain text body
