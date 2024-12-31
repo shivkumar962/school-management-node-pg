@@ -175,3 +175,11 @@ module.exports.createSubject = async (req, res) => {
     return res.json({ status: false, message: "Server error" });
   }
 };
+
+
+module.exports.createSubjectInClassSubjectMapping = async (req, res) => {
+  console.log("dataa===",req.body);
+  
+
+  return  res.json("create Subject In Class Subject Mapping");
+}

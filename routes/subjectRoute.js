@@ -21,6 +21,8 @@ router.get('/subject/:id', getByIdSubjectValidation, subjectController.getByIdSu
 
 router.post('/subject', postSubjectValidation , subjectController.createSubject);
 
+router.post('/subjectmapp' , subjectController.createSubjectInClassSubjectMapping);
+
 router.put('/subject/:id', updateSubjectValidation, subjectController.updateByIdSubject);
 
 router.delete('/subject/:id', deleteSubjectValidation, subjectController.deleteByIdSubject);
